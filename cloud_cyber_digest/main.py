@@ -1,5 +1,7 @@
 from fetcher import fetch_articles
-from summarizer import summarize_article
+from pdf_generator import CyberPDF
+from summarizer import summarize_article, generate_takeaways
+from mongo_handler import save_article
 
 print("🔍 Fetching real articles...")
 articles = fetch_articles(limit=3)
@@ -8,11 +10,17 @@ for i, article in enumerate(articles, start=1):
     print(f"\n--- Article {i} ---")
     print(f"🔗 {article['link']}")
     print(f"📰 Title: {article['title']}")
-    
+
     summary = summarize_article(article["title"], article["summary"])
     print(f"\n🧠 Summary:\n{summary}")
-from pdf_generator import CyberPDF
-from summarizer import summarize_article, generate_takeaways
+
+    # Save to MongoDB
+    mongo_ready = {
+        "title": article["title"],
+        "summary": summary,
+        "url": article["link"]
+    }
+    save_article(mongo_ready)
 
 # Build PDF
 pdf = CyberPDF()

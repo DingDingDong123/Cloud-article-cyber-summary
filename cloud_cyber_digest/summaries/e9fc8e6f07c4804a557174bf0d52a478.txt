@@ -1,0 +1,5 @@
+1. 📰 **Summary:** The Russian threat actor group TAG-110 is conducting phishing campaigns in Tajikistan.  This activity, while Ukraine remains a primary focus of Russian cyberattacks, demonstrates a broader Russian strategy to maintain influence within former Soviet republics by infiltrating their critical infrastructure.
+
+2. ⚠️ **Impact:** TAG-110's operations in Tajikistan could compromise sensitive government and private sector data, potentially leading to data breaches, espionage, and disruption of essential services. This underscores the risk posed by persistent Russian cyber activity extending beyond Ukraine's borders.
+
+3. ✅ **Takeaways:**  Russia's cyber strategy aims to project power and influence beyond Ukraine's immediate conflict zone.  Organizations in former Soviet states should heighten their cybersecurity vigilance, focusing on phishing awareness training and robust defenses against advanced persistent threats.  International cooperation is crucial in addressing the escalating threat posed by Russian state-sponsored cyberattacks.

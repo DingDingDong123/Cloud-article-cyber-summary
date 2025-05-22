@@ -1,0 +1,5 @@
+1. 📰 **Summary:** The ransomware group 3am is employing a combined email bombing and vishing (voice phishing) attack strategy to gain initial access to victim systems before deploying ransomware. This tactic mirrors techniques already used by other prominent ransomware groups like Black Basta.
+
+2. ⚠️ **Impact:**  This combined approach significantly increases the likelihood of successful ransomware attacks.  Email bombing overwhelms security systems and increases the chance of phishing emails getting through, while vishing leverages human error to bypass technical security measures.  The result is a greater risk of data breaches, system downtime, financial losses, and reputational damage for targeted organizations.
+
+3. ✅ **Takeaways:** Organizations should bolster their email security defenses, including robust spam filtering, employee security awareness training (especially regarding phishing and vishing attempts), and multi-factor authentication.  Proactive threat hunting and incident response planning are also crucial to mitigate the impact of such sophisticated attacks.

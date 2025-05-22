@@ -1,0 +1,5 @@
+1. 📰 **Summary:** Hackers are distributing malicious applications disguised as legitimate Ledger cryptocurrency wallet software on macOS.  These fake apps aim to steal users' seed phrases, the secret key that grants access to their cryptocurrency holdings.  This allows criminals to gain control of and empty the victims' wallets.
+
+2. ⚠️ **Impact:** macOS users who download and install these fraudulent Ledger apps risk the complete loss of their cryptocurrency assets.  The stolen seed phrases provide unrestricted access to their digital wallets, leaving victims with no recourse to recover their funds. The financial impact can be significant, depending on the amount of cryptocurrency stored in the compromised wallets.
+
+3. ✅ **Takeaways:** Users should exercise extreme caution when downloading software, particularly cryptocurrency-related applications. Only download software directly from the official Ledger website and verify the legitimacy of the download source.  Be wary of unsolicited emails or links promising Ledger software updates or support. Regularly update your operating system and antivirus software to mitigate risks from malware.

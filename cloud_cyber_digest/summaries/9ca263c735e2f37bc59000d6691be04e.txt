@@ -1,0 +1,5 @@
+1. 📰 **Summary:** Marks & Spencer (M&S), a major UK retailer, has been hit by a ransomware attack that is expected to cause significant disruption lasting into July.  The company anticipates the attack will cost them approximately $400 million.
+
+2. ⚠️ **Impact:** The ransomware attack has caused considerable operational disruption to M&S. The full extent of the damage and the specifics of the attack remain undisclosed, but the $400 million projected cost highlights a severe impact on the company's finances and operations. This suggests substantial system downtime, potential data breaches, and extensive remediation efforts are underway.
+
+3. ✅ **Takeaways:** This incident underscores the significant financial and operational risks associated with ransomware attacks, even for large, established companies.  The scale of the projected cost highlights the importance of robust cybersecurity defenses and incident response planning.  The ongoing disruption demonstrates the potential for long-term consequences, impacting business continuity and financial stability.

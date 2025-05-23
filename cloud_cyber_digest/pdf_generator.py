@@ -72,5 +72,8 @@ class CyberPDF(FPDF):
                 self.multi_cell(0, 5, f"{i}. [Takeaway could not be rendered]")
                 self.ln(1)
 
-    def save(self, filename="daily_cyber_brief.pdf"):
+    def save(self, filename=None):
+        if not filename:
+            date_str = datetime.now().strftime("%Y-%m-%d")
+            filename = f"summaries/pdf_summarizes/daily_cyber_brief_{date_str}.pdf"
         self.output(filename)

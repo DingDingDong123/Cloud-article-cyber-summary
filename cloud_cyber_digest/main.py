@@ -2,17 +2,19 @@ from fetcher import fetch_articles
 from pdf_generator import CyberPDF
 from summarizer import summarize_article, generate_takeaways
 from mongo_handler import save_article
+from telegram_sender import send_today_pdf
+
 
 print("🔍 Fetching real articles...")
 articles = fetch_articles(limit=3)
 
 for i, article in enumerate(articles, start=1):
-    print(f"\n--- Article {i} ---")
-    print(f"🔗 {article['link']}")
-    print(f"📰 Title: {article['title']}")
+    # print(f"\n--- Article {i} ---")
+    # print(f"🔗 {article['link']}")
+    # print(f"📰 Title: {article['title']}")
 
     summary = summarize_article(article["title"], article["summary"])
-    print(f"\n🧠 Summary:\n{summary}")
+    # print(f"\n🧠 Summary:\n{summary}")
 
     # Save to MongoDB
     mongo_ready = {
@@ -36,3 +38,6 @@ pdf.add_takeaways(takeaways)
 
 # Save it
 pdf.save()
+
+# ✅ Send to Telegram
+send_today_pdf()

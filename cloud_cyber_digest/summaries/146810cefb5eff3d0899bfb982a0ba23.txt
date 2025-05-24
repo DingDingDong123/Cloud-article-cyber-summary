@@ -1,0 +1,5 @@
+1. 📰 **Summary:** Law enforcement disrupted the DanaBot botnet, a large-scale network of compromised devices, and charged 16 suspects in connection with its operation.
+
+2. ⚠️ **Impact:**  The DanaBot botnet infected over 300,000 devices and resulted in more than $50 million in damages before its disruption.
+
+3. ✅ **Takeaways:**  This successful takedown highlights the global reach and significant financial impact of botnets.  It also underscores the importance of international collaboration in combating cybercrime.

@@ -1,43 +1,75 @@
 from fetcher import fetch_articles
-from pdf_generator import CyberPDF
 from summarizer import summarize_article, generate_takeaways
 from mongo_handler import save_article
 from telegram_sender import send_today_pdf
+from pdf_generator import create_one_page_summary
+from pdf_generator import OnePageCyberBrief  # for severity detection
 
+from datetime import datetime
 
 print("🔍 Fetching real articles...")
-articles = fetch_articles(limit=3)
+articles = fetch_articles(limit=9)
 
-for i, article in enumerate(articles, start=1):
-    # print(f"\n--- Article {i} ---")
-    # print(f"🔗 {article['link']}")
-    # print(f"📰 Title: {article['title']}")
+processed_articles = []
 
+for article in articles:
+    print(f"📰 Title: {article['title']}")
     summary = summarize_article(article["title"], article["summary"])
-    # print(f"\n🧠 Summary:\n{summary}")
+
+    # Determine severity
+    severity = OnePageCyberBrief().determine_severity(article["title"], summary)
 
     # Save to MongoDB
     mongo_ready = {
         "title": article["title"],
         "summary": summary,
-        "url": article["link"]
+        "url": article["link"],
+        "severity": severity
     }
     save_article(mongo_ready)
 
-# Build PDF
-pdf = CyberPDF()
+    # Prepare for PDF
+    processed_articles.append({
+        "title": article["title"],
+        "summary": summary,
+        "severity": severity
+    })
 
-for article in articles:
-    summary = summarize_article(article['title'], article['summary'])
-    pdf.add_article(article['title'], summary)
-
-# 🔥 Ask Gemini to generate 5 key takeaways
-takeaway_text = "\n".join([f"{a['title']}\n{a['summary']}" for a in articles])
+# 🔥 Generate takeaways from summaries
+takeaway_text = "\n".join(
+    f"{a['title']}\n{a['summary']}" for a in processed_articles
+)
 takeaways = generate_takeaways(takeaway_text)
-pdf.add_takeaways(takeaways)
 
-# Save it
-pdf.save()
+# 📊 Build summary stats
+stats = {
+    "total": len(processed_articles),
+    "critical": sum(1 for a in processed_articles if a["severity"] == "critical"),
+    "high": sum(1 for a in processed_articles if a["severity"] == "high"),
+    "medium": sum(1 for a in processed_articles if a["severity"] == "medium"),
+    "low": sum(1 for a in processed_articles if a["severity"] == "low"),
+}
 
-# ✅ Send to Telegram
+# 🧠 Compact key incidents table
+incidents = []
+for a in processed_articles:
+    impact_line = ""
+    for line in a["summary"].split("\n"):
+        if "⚠" in line or "impact" in line.lower():
+            impact_line = line.strip()
+            break
+
+    incidents.append({
+        "title": a["title"],
+        "severity": a["severity"],
+        "impact": impact_line
+    })
+
+# 📄 Generate the 1-page PDF
+pdf = create_one_page_summary(stats, takeaways, incidents)
+
+# 💾 Save and send
+filename = pdf.save()
 send_today_pdf()
+
+print(f"✅ One-page brief generated and sent: {filename}")

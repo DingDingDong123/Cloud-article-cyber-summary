@@ -5,8 +5,8 @@ from config import TELEGRAM_TOKEN, TELEGRAM_CHAT_ID
 
 def send_today_pdf():
     today = datetime.date.today().strftime("%Y-%m-%d")
-    filename = f"daily_cyber_brief_{today}.pdf"
-    filepath = os.path.join("summaries", "pdf_summarizes", filename)
+    filename = f"brief_{today}_onepage.pdf"
+    filepath = os.path.join("summaries", "pdf_summaries", filename)
 
     if not os.path.isfile(filepath):
         print(f"❌ PDF for today ({filename}) not found in 'pdf_summarizes'")

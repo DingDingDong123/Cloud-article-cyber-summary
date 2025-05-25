@@ -7,8 +7,19 @@ from pdf_generator import OnePageCyberBrief  # for severity detection
 from datetime import datetime
 from auth_handler import get_current_user
 from fastapi import Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # or ["*"] for all origins (less secure)
+    allow_credentials=True,
+    allow_methods=["*"],       # allow GET, POST, OPTIONS etc.
+    allow_headers=["*"]
+)
+
 
 @app.get("/profile")
 async def get_profile(user=Depends(get_current_user)):

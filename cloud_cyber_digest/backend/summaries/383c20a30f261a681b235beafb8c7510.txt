@@ -1,0 +1,5 @@
+**Summary:** Glitch, an app hosting platform, will cease operations, including app hosting and user profile services, on July 8, 2025.  This decision is driven by evolving market conditions and significant platform abuse, leading to unsustainable operational costs.
+
+**Impact:**  Organizations and users currently relying on Glitch for app hosting and profile management will need to migrate their data and applications to alternative platforms before the July 8, 2025 deadline. Failure to do so will result in data loss and service disruption.
+
+**Takeaways:** Immediately begin assessing your reliance on Glitch. Develop a migration plan to a suitable alternative platform, ensuring data backups and application transfer are completed well before the July 2025 cutoff.  Consider security implications during the migration process to prevent data breaches.

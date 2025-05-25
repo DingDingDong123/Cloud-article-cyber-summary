@@ -10,99 +10,180 @@ class OnePageCyberBrief(FPDF):
         self.set_margins(10, 10, 10)
         self.add_font("FreeSerif", "", os.path.join("fonts", "FreeSerif.ttf"), uni=True)
         self.add_font("FreeSerif", "B", os.path.join("fonts", "FreeSerifBold.ttf"), uni=True)
+        self.add_font("Noto", "", os.path.join("fonts", "NotoSans-Regular.ttf"), uni=True)
+        self.add_font("Noto", "B", os.path.join("fonts", "NotoSans-Bold.ttf"), uni=True)
         self.add_page()
-        self.set_font("FreeSerif", size=11)
+
+    def rounded_rect(self, x, y, w, h, r, style=''):
+        """Draw a rounded rectangle (uses 4 Bézier curves)"""
+        k = self.k
+        hp = self.h
+        if style == 'F':
+            op = 'f'
+        elif style == 'FD' or style == 'DF':
+            op = 'B'
+        else:
+            op = 'S'
+
+        MyArc = 4/3 * (2**0.5 - 1) * r
+
+        self._out(f'{x * k:.2f} {(hp - y) * k:.2f} m')
+        self._out(f'{(x + w) * k:.2f} {(hp - y) * k:.2f} l')
+        self._out(f'{(x + w) * k:.2f} {(hp - (y + h)) * k:.2f} l')
+        self._out(f'{x * k:.2f} {(hp - (y + h)) * k:.2f} l')
+        self._out(f'{x * k:.2f} {(hp - y) * k:.2f} l {op}')
 
     def draw_header(self):
-        self.set_fill_color(230, 245, 255)
-        self.rect(10, 10, self.w - 20, 20, style='F')
+        # Page border
+        self.set_draw_color(50, 90, 200)
+        self.set_line_width(1)
+        self.rect(8, 8, self.w - 16, self.h - 16)
 
+        # Header background box
+        self.set_fill_color(235, 244, 255)
+        self.rect(10, 10, self.w - 20, 30, style='F')  # height = 30
+
+        # Logo: vertically centered in 30mm header
         logo_path = "assets/logo.png"
         if os.path.exists(logo_path):
-            self.image(logo_path, x=12, y=12, w=16)
+            self.image(logo_path, x=12, y=13.5, w=40)  # 13.5 aligns nicely for 22mm logo
 
-        self.set_xy(30, 12)
-        self.set_font("FreeSerif", "B", 16)
-        self.set_text_color(0, 51, 102)
-        self.cell(0, 8, "CYBERSECURITY BRIEF", ln=True)
-
-        self.set_font("FreeSerif", size=12)
-        self.set_text_color(80, 80, 80)
-        self.cell(0, 8, datetime.today().strftime("%B %d, %Y"), ln=True)
+        # Right-aligned title: vertically centered (total height = 2 × 8 = 16)
+        # Start around center of header box (10 + 15) minus 8 = ~17
+        self.set_font("Noto", "B", 18)
         self.set_text_color(0, 0, 0)
-        self.ln(6)
+
+        self.set_xy(self.w - 95, 16.5)
+        self.cell(80, 8, "CYBERSECURITY", ln=True, align='L')
+
+        self.set_xy(self.w - 95, 24.5)
+        self.cell(80, 8, "BRIEF", ln=True, align='L')
 
     def add_stats(self, stats):
-        labels = [
-            ("CRITICAL", stats["critical"], (220, 53, 69)),
-            ("HIGH", stats["high"], (255, 159, 67)),
-            ("MEDIUM", stats["medium"], (30, 144, 255)),
-            ("LOW", stats["low"], (40, 167, 69))
+        # Define stat data with your original colors
+        values = [
+            ("Total Articles", stats.get("total", 0), (90, 120, 255)),   # Blue
+            ("Critical", stats.get("critical", 0), (255, 80, 80)),       # Red
+            ("High", stats.get("high", 0), (255, 180, 60)),              # Orange
+            ("Medium", stats.get("medium", 0), (90, 200, 120))           # Green
         ]
-        box_width = (self.w - 20 - 3 * 5) / 4
-        y = self.get_y()
-        x = 10
 
-        self.set_font("FreeSerif", "B", 11)
-        for label, value, color in labels:
-            self.set_xy(x, y)
-            self.set_fill_color(*color)
-            self.set_text_color(255, 255, 255)
-            self.cell(box_width, 10, f"{label}: {value}", ln=0, align="C", fill=True)
-            x += box_width + 5
+        # Draw background container
+        box_x = 15
+        box_y = 48
+        box_w = self.w - 30
+        box_h = 26
+        self.set_fill_color(240, 245, 255)  # light blue background
+        self.rect(box_x, box_y, box_w, box_h, style='F')
 
-        self.ln(14)
-        self.set_text_color(0, 0, 0)
+        # Calculate width of each column
+        col_count = len(values)
+        col_width = box_w / col_count
+
+        # Start drawing stats
+        for i, (label, value, color) in enumerate(values):
+            col_x = box_x + i * col_width
+            num_y = box_y + 4
+            label_y = box_y + 14
+
+            # Draw number
+            self.set_xy(col_x, num_y)
+            self.set_font("Noto", "B", 26)
+            self.set_text_color(*color)
+            self.cell(col_width, 6, str(value), ln=True, align='C')
+
+            # Draw label below
+            self.set_xy(col_x, label_y)
+            self.set_font("Noto", "B", 10)
+            self.set_text_color(0, 0, 0)
+            self.cell(col_width, 6, label, ln=True, align='C')
 
     def add_takeaways(self, takeaways):
-        self.set_fill_color(240, 240, 240)
-        self.set_font("FreeSerif", "B", 12)
-        self.cell(0, 10, "STRATEGIC TAKEAWAYS", ln=True, fill=True)
+        box_x = 15
+        box_y = 80
+        box_w = self.w - 30
+        box_h = 90
+        self.set_fill_color(250, 250, 255)
+        self.rect(box_x, box_y, box_w, box_h, style='F')
 
-        self.set_font("FreeSerif", size=11)
-        bullets = ["[Insight]", "[Alert]", "[Idea]", "[Threat]", "[Secure]"]
-        for i, takeaway in enumerate(takeaways[:5]):
-            clean = takeaway.replace("•", "-").replace("\u2022", "-").strip()
-            prefix = bullets[i % len(bullets)]
-            wrapped_lines = textwrap.wrap(f"{prefix} {clean}", width=100)
-            for line in wrapped_lines:
-                self.cell(0, 6, line, ln=True)
-            self.ln(1)
+        # Title
+        self.set_xy(box_x + 2, box_y + 4)
+        self.set_font("Noto", "B", 13)
+        self.set_text_color(30, 30, 30)
+        self.cell(0, 6, "STRATEGIC TAKEAWAYS", ln=True)
 
-    def add_key_incidents(self, incidents):
-        self.set_fill_color(240, 240, 240)
-        self.set_font("FreeSerif", "B", 12)
-        self.cell(0, 10, "KEY INCIDENTS", ln=True, fill=True)
+        # Start below the title
+        current_y = box_y + 12
+        max_width = box_w - 8
 
-        self.set_font("FreeSerif", "B", 11)
-        self.set_fill_color(220, 220, 220)
-        self.cell(90, 8, "Title", border=1, fill=True)
-        self.cell(30, 8, "Severity", border=1, fill=True)
-        self.cell(60, 8, "Impact", border=1, fill=True, ln=True)
+        self.set_text_color(0, 0, 0)
+        self.set_font("Noto", "", 11)
 
-        self.set_font("FreeSerif", size=10)
-        for idx, incident in enumerate(sorted(incidents[:6], key=lambda x: ["critical", "high", "medium", "low"].index(x["severity"]))):
-            title_lines = textwrap.wrap(incident["title"], width=45)
-            impact_lines = textwrap.wrap(incident.get("impact", "-"), width=45)
-            max_lines = max(len(title_lines), len(impact_lines))
-            self.set_fill_color(255, 255, 255) if idx % 2 == 0 else self.set_fill_color(248, 248, 248)
+        for item in takeaways[:5]:
+            self.set_xy(box_x + 4, current_y)
 
-            for i in range(max_lines):
-                self.cell(90, 6, title_lines[i] if i < len(title_lines) else "", border=1, fill=True)
+            # ✅ Extract bold prefix (e.g., "**Title:** rest of sentence")
+            if '**' in item and ':' in item:
+                try:
+                    bold_part = item.split('**')[1].split(':')[0].strip()
+                    rest = item.split(':', 1)[1].strip()
 
-                if i == 0:
-                    sev = incident["severity"]
-                    label = {
-                        "critical": "🟥 Critical",
-                        "high": "🟧 High",
-                        "medium": "🟦 Medium",
-                        "low": "🟩 Low"
-                    }.get(sev, sev)
-                    self.cell(30, 6, label, border=1, fill=True)
-                else:
-                    self.cell(30, 6, "", border=1, fill=True)
+                    # Render bold part
+                    self.set_font("Noto", "B", 11)
+                    self.multi_cell(max_width, 6, f"{bold_part}:", ln=False)
 
-                self.cell(60, 6, impact_lines[i] if i < len(impact_lines) else "", border=1, fill=True, ln=True)
+                    # Render normal part
+                    self.set_font("Noto", "", 11)
+                    self.multi_cell(max_width, 6, rest)
+                except Exception as e:
+                    # fallback to raw line if parsing fails
+                    self.set_font("Noto", "", 11)
+                    self.multi_cell(max_width, 6, item.strip())
+            else:
+                # No bold prefix — just print
+                self.set_font("Noto", "", 11)
+                self.multi_cell(max_width, 6, item.strip())
+
+            current_y = self.get_y() + 2  # Add space after each block
+
+
+
+
+    # def add_key_incidents(self, incidents):
+    #     self.set_fill_color(235, 244, 255)
+    #     self.set_font("FreeSerif", "B", 12)
+    #     self.cell(0, 10, "KEY INCIDENTS", ln=True, fill=True)
+
+    #     self.set_font("FreeSerif", "B", 11)
+    #     self.set_fill_color(210, 210, 210)
+    #     self.cell(90, 8, "Title", border=1, fill=True)
+    #     self.cell(30, 8, "Severity", border=1, fill=True)
+    #     self.cell(60, 8, "Impact", border=1, fill=True, ln=True)
+
+    #     self.set_font("FreeSerif", size=10)
+    #     for idx, incident in enumerate(sorted(incidents[:6], key=lambda x: ["critical", "high", "medium", "low"].index(x["severity"]))):
+    #         title_lines = textwrap.wrap(incident["title"], width=43)
+    #         impact_lines = textwrap.wrap(incident.get("impact", "-"), width=43)
+    #         max_lines = max(len(title_lines), len(impact_lines))
+
+    #         self.set_fill_color(255, 255, 255) if idx % 2 == 0 else self.set_fill_color(245, 245, 245)
+
+    #         for i in range(max_lines):
+    #             self.cell(90, 6, title_lines[i] if i < len(title_lines) else "", border=1, fill=True)
+
+    #             if i == 0:
+    #                 sev = incident["severity"]
+    #                 label = {
+    #                     "critical": "🟥 Critical",
+    #                     "high": "🟧 High",
+    #                     "medium": "🟦 Medium",
+    #                     "low": "🟩 Low"
+    #                 }.get(sev, sev.capitalize())
+    #                 self.cell(30, 6, label, border=1, fill=True)
+    #             else:
+    #                 self.cell(30, 6, "", border=1, fill=True)
+
+    #             self.cell(60, 6, impact_lines[i] if i < len(impact_lines) else "", border=1, fill=True, ln=True)
 
     def save(self):
         path = f"summaries/pdf_summaries/brief_{datetime.today().strftime('%Y-%m-%d')}_onepage.pdf"
@@ -125,5 +206,5 @@ def create_one_page_summary(stats, takeaways, incidents):
     pdf.draw_header()
     pdf.add_stats(stats)
     pdf.add_takeaways(takeaways)
-    pdf.add_key_incidents(incidents)
+    # pdf.add_key_incidents(incidents)
     return pdf

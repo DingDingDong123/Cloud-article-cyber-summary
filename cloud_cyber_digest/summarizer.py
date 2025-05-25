@@ -17,16 +17,23 @@ def summarize_article(title: str, content: str) -> str:
         with open(cache_path, "r") as f:
             return f.read()
 
-    prompt = f"""Summarize the following article in 3 parts:
+    prompt = f"""
+You are a cybersecurity analyst. Summarize the following article in 3 clear, structured sections.
+
+Each section must begin with a label (**bolded**) and a colon. Avoid emojis or numbering. Keep the writing concise and actionable.
 
 Title: {title}
 Content: {content}
 
-Format:
-1. 📰 Summary:
-2. ⚠️ Impact:
-3. ✅ Takeaways:
+Output format (MUST match this exactly):
+
+**Summary:** One short paragraph summarizing the main incident or theme.
+
+**Impact:** A short explanation of how it affects organizations or users.
+
+**Takeaways:** 2–3 action-oriented recommendations (one paragraph or bullet list).
 """
+
     try:
         response = model.generate_content(prompt)
         result = response.text.strip()

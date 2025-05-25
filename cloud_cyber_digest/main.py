@@ -4,8 +4,16 @@ from mongo_handler import save_article
 from telegram_sender import send_today_pdf
 from pdf_generator import create_one_page_summary
 from pdf_generator import OnePageCyberBrief  # for severity detection
-
 from datetime import datetime
+from auth_handler import get_current_user
+from fastapi import Depends, FastAPI
+
+app = FastAPI()
+
+@app.get("/profile")
+async def get_profile(user=Depends(get_current_user)):
+    return {"uid": user["uid"], "email": user["email"]}
+
 
 print("🔍 Fetching real articles...")
 articles = fetch_articles(limit=9)

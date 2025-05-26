@@ -1,7 +1,7 @@
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../../Components/ui/card";
-import { Badge } from "../../Components/ui/badge";
-import { Skeleton } from "../../Components/ui/skeleton";
+import { Card, CardContent, CardHeader } from "../ui/card";
+import { Badge } from "../ui/badge";
+import { Skeleton } from "../ui/skeleton";
 import { Activity, FileText, Clock } from "lucide-react";
 import { format } from "date-fns";
 
@@ -9,10 +9,10 @@ export default function ActivityFeed({ reports, loading }) {
   return (
     <Card className="bg-white/80 backdrop-blur-sm border-slate-200/60 premium-shadow-lg">
       <CardHeader className="border-b border-slate-200/60">
-        <CardTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
+        <div className="text-lg font-bold text-slate-900 flex items-center gap-2">
           <Activity className="w-5 h-5 text-blue-600" />
           Recent Activity
-        </CardTitle>
+        </div>
       </CardHeader>
       <CardContent className="p-0">
         {loading ? (

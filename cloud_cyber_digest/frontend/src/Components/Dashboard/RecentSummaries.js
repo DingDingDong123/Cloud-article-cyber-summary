@@ -1,10 +1,10 @@
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "../ui/card";
+import { Badge } from "../ui/badge";
+import { Skeleton } from "../ui/skeleton";
+import { Button } from "../ui/button";
 import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
+import { createPageUrl } from "../../utils";
 import { Brain, ExternalLink, Clock, ArrowRight } from "lucide-react";
 import { format } from "date-fns";
 
@@ -31,10 +31,10 @@ export default function RecentSummaries({ summaries, loading }) {
     <Card className="bg-white/80 backdrop-blur-sm border-slate-200/60 premium-shadow-lg">
       <CardHeader className="border-b border-slate-200/60">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-xl font-bold text-slate-900 flex items-center gap-2">
+          <div className="text-xl font-bold text-slate-900 flex items-center gap-2">
             <Brain className="w-6 h-6 text-blue-600" />
             Recent Summaries
-          </CardTitle>
+          </div>
           <Link to={createPageUrl("Summaries")}>
             <Button variant="ghost" size="sm" className="gap-2 text-slate-600 hover:text-slate-900">
               View All

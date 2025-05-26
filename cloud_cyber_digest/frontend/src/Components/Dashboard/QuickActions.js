@@ -1,8 +1,8 @@
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "../ui/card";
+import { Button } from "../ui/button";
 import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
+import { createPageUrl } from "../../utils";
 import { Plus, Zap, Settings, Download } from "lucide-react";
 
 const quickActions = [
@@ -40,7 +40,7 @@ export default function QuickActions() {
   return (
     <Card className="bg-white/80 backdrop-blur-sm border-slate-200/60 premium-shadow-lg">
       <CardHeader className="border-b border-slate-200/60">
-        <CardTitle className="text-lg font-bold text-slate-900">Quick Actions</CardTitle>
+        <div className="text-lg font-bold text-slate-900">Quick Actions</div>
       </CardHeader>
       <CardContent className="p-4">
         <div className="grid grid-cols-1 gap-3">

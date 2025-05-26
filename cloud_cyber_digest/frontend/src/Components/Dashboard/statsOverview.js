@@ -1,6 +1,6 @@
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent, CardHeader } from "../ui/card";
+import { Skeleton } from "../ui/skeleton";
 import { Rss, Brain, FileText, TrendingUp } from "lucide-react";
 
 const statConfigs = [
@@ -41,9 +41,9 @@ export default function StatsOverview({ stats, loading }) {
         <Card key={config.key} className="bg-white/80 backdrop-blur-sm border-slate-200/60 premium-shadow-lg hover:premium-shadow-xl transition-all duration-300 group">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold text-slate-600 uppercase tracking-wide">
+              <div className="text-sm font-semibold text-slate-600 uppercase tracking-wide">
                 {config.title}
-              </CardTitle>
+              </div>
               <div className={`p-2 rounded-xl bg-gradient-to-br ${config.bgGradient} opacity-90 group-hover:opacity-100 transition-opacity`}>
                 <config.icon className="w-4 h-4 text-white" />
               </div>

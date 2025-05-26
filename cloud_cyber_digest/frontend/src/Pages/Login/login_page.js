@@ -29,12 +29,16 @@ function LoginPage() {
 
   return (
     <div className="h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-      <button
-        onClick={handleLogin}
-        className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white text-lg rounded-lg shadow-lg"
-      >
-        Sign In with Google
-      </button>
+      <div className="bg-white p-8 rounded-lg shadow-lg">
+        <h1 className="text-2xl font-bold mb-4 text-center">Welcome Back</h1>
+        <p className="text-gray-600 mb-6 text-center">Please sign in to continue</p>
+        <button
+          onClick={handleLogin}
+          className="w-full px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white text-lg rounded-lg shadow-lg"
+        >
+          Sign In with Google
+        </button>
+      </div>
     </div>
   );
 }

@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader } from "../ui/card";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Button } from "../ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Badge } from "../ui/badge";
 import { X, Plus } from "lucide-react";
 
 const SOURCE_TYPES = [
@@ -62,12 +62,14 @@ export default function SourceForm({ source, onSubmit, onCancel }) {
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <Card className="w-full max-w-2xl bg-white premium-shadow-lg">
         <CardHeader className="border-b border-slate-200">
-          <CardTitle className="flex items-center justify-between">
-            <span>{source ? "Edit Source" : "Add New Source"}</span>
+          <div className="flex items-center justify-between">
+            <div className="text-lg font-bold text-slate-900">
+              {source ? "Edit Source" : "Add New Source"}
+            </div>
             <Button variant="ghost" size="icon" onClick={onCancel}>
               <X className="w-4 h-4" />
             </Button>
-          </CardTitle>
+          </div>
         </CardHeader>
         <CardContent className="p-6">
           <form onSubmit={handleSubmit} className="space-y-6">

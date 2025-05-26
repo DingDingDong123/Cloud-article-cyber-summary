@@ -1,8 +1,8 @@
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent, CardHeader } from "../ui/card";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { Skeleton } from "../ui/skeleton";
 import { 
   Rss, 
   Globe, 
@@ -85,9 +85,9 @@ export default function SourceList({ sources, loading, onEdit, onDelete, onToggl
                     <TypeIcon className="w-5 h-5 text-slate-600 group-hover:text-blue-600" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg font-bold text-slate-900 line-clamp-1">
+                    <div className="text-lg font-bold text-slate-900 line-clamp-1">
                       {source.name}
-                    </CardTitle>
+                    </div>
                     <p className="text-sm text-slate-500 capitalize">
                       {source.type.replace('_', ' ')}
                     </p>

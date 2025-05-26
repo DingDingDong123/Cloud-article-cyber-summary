@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
 import { Button } from "../../Components/ui/button";       // ✅ correct
 import { Badge } from "../../Components/ui/badge";       // ✅ correct
 import { Card, CardContent } from "../../Components/ui/card";  // ✅ correct
@@ -33,7 +35,8 @@ import CTASection from "../../Components/landing/cta_section";
 
 export default function Landing() {
   const [isVisible, setIsVisible] = useState(false);
-
+  const navigate = useNavigate();
+  // Redirect to login if user is authenticated
   useEffect(() => {
     setIsVisible(true);
   }, []);
@@ -63,9 +66,13 @@ export default function Landing() {
               <a href="#pricing" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">
                 Pricing
               </a>
-              <Button variant="outline" className="border-gray-200">
-                Sign In
-              </Button>
+              <Button
+              onClick={() => navigate("/login")}
+              variant="outline"
+              className="border-gray-200"
+            >
+              Sign In
+            </Button>
               <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg">
                 Start Free Trial
               </Button>

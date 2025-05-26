@@ -1,0 +1,68 @@
+{
+    "name": "UserPreferences",
+    "type": "object",
+    "properties": {
+      "company_name": {
+        "type": "string",
+        "description": "User's company name"
+      },
+      "logo_url": {
+        "type": "string",
+        "description": "Company logo URL"
+      },
+      "brand_color": {
+        "type": "string",
+        "default": "#1e40af",
+        "description": "Brand color hex code"
+      },
+      "industries_of_interest": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Industries user is interested in"
+      },
+      "delivery_preferences": {
+        "type": "object",
+        "properties": {
+          "frequency": {
+            "type": "string",
+            "enum": [
+              "daily",
+              "weekly",
+              "triggered"
+            ],
+            "default": "daily"
+          },
+          "channels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "email": {
+            "type": "string"
+          },
+          "telegram_id": {
+            "type": "string"
+          },
+          "whatsapp": {
+            "type": "string"
+          }
+        },
+        "description": "How and when to deliver reports"
+      },
+      "report_template": {
+        "type": "string",
+        "enum": [
+          "executive",
+          "detailed",
+          "technical",
+          "compliance"
+        ],
+        "default": "executive",
+        "description": "Preferred report template"
+      }
+    },
+    "required": []
+  }

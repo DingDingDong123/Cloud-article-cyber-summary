@@ -1,0 +1,84 @@
+{
+    "name": "Report",
+    "type": "object",
+    "properties": {
+      "title": {
+        "type": "string",
+        "description": "Report title"
+      },
+      "date_range": {
+        "type": "object",
+        "properties": {
+          "start": {
+            "type": "string",
+            "format": "date"
+          },
+          "end": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "description": "Date range covered"
+      },
+      "industry": {
+        "type": "string",
+        "enum": [
+          "cybersecurity",
+          "marketing",
+          "supply_chain",
+          "legislative",
+          "finance",
+          "technology"
+        ],
+        "description": "Industry focus"
+      },
+      "summary_ids": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Summary IDs included in report"
+      },
+      "pdf_url": {
+        "type": "string",
+        "description": "Generated PDF URL"
+      },
+      "status": {
+        "type": "string",
+        "enum": [
+          "draft",
+          "generating",
+          "completed",
+          "delivered"
+        ],
+        "default": "draft",
+        "description": "Report status"
+      },
+      "template_config": {
+        "type": "object",
+        "properties": {
+          "theme_color": {
+            "type": "string"
+          },
+          "logo_url": {
+            "type": "string"
+          },
+          "layout_sections": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "font_family": {
+            "type": "string"
+          }
+        },
+        "description": "Template configuration"
+      }
+    },
+    "required": [
+      "title",
+      "date_range",
+      "industry"
+    ]
+  }

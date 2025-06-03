@@ -1,0 +1,87 @@
+{
+    "name": "Summary",
+    "type": "object",
+    "properties": {
+      "title": {
+        "type": "string",
+        "description": "Article title"
+      },
+      "original_url": {
+        "type": "string",
+        "description": "Original article URL"
+      },
+      "source_id": {
+        "type": "string",
+        "description": "Reference to source"
+      },
+      "executive_summary": {
+        "type": "string",
+        "description": "AI-generated executive summary"
+      },
+      "impact_analysis": {
+        "type": "string",
+        "description": "AI-generated impact analysis"
+      },
+      "strategic_takeaways": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Key strategic points"
+      },
+      "severity_level": {
+        "type": "string",
+        "enum": [
+          "low",
+          "medium",
+          "high",
+          "critical"
+        ],
+        "description": "AI-detected severity"
+      },
+      "category": {
+        "type": "string",
+        "enum": [
+          "finance",
+          "cloud",
+          "nation_state",
+          "ransomware",
+          "ai",
+          "regulation",
+          "breach",
+          "vulnerability"
+        ],
+        "description": "AI-detected category"
+      },
+      "industry": {
+        "type": "string",
+        "enum": [
+          "cybersecurity",
+          "marketing",
+          "supply_chain",
+          "legislative",
+          "finance",
+          "technology"
+        ],
+        "description": "Industry relevance"
+      },
+      "processed_date": {
+        "type": "string",
+        "format": "date",
+        "description": "Date processed"
+      },
+      "included_in_report": {
+        "type": "boolean",
+        "default": false,
+        "description": "Whether included in generated report"
+      }
+    },
+    "required": [
+      "title",
+      "original_url",
+      "executive_summary",
+      "severity_level",
+      "category",
+      "industry"
+    ]
+  }

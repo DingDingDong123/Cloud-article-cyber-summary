@@ -1,0 +1,61 @@
+{
+    "name": "Source",
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "Display name for the source"
+      },
+      "url": {
+        "type": "string",
+        "description": "RSS feed or news URL"
+      },
+      "type": {
+        "type": "string",
+        "enum": [
+          "rss",
+          "news_url",
+          "api",
+          "twitter",
+          "recorded_future",
+          "cisa"
+        ],
+        "description": "Type of source"
+      },
+      "industry": {
+        "type": "string",
+        "enum": [
+          "cybersecurity",
+          "marketing",
+          "supply_chain",
+          "legislative",
+          "finance",
+          "technology"
+        ],
+        "description": "Industry focus"
+      },
+      "keywords": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Filter keywords"
+      },
+      "active": {
+        "type": "boolean",
+        "default": true,
+        "description": "Whether source is active"
+      },
+      "last_processed": {
+        "type": "string",
+        "format": "date-time",
+        "description": "Last time source was processed"
+      }
+    },
+    "required": [
+      "name",
+      "url",
+      "type",
+      "industry"
+    ]
+  }

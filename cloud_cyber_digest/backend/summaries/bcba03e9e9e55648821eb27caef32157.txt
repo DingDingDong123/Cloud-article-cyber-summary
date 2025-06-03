@@ -1,0 +1,5 @@
+1. 📰 **Summary:** Signal has implemented a new default privacy feature for its Windows 11 app that blocks Microsoft from taking screenshots of the application during the "Windows Recall" process.  This is a proactive measure to protect user privacy.
+
+2. ⚠️ **Impact:** This feature directly counters Microsoft's ability to capture screenshots within the Signal app as part of its "Windows Recall" system, likely intended for troubleshooting or diagnostics.  The impact on Microsoft's system is unclear, but it represents a direct challenge to their data collection practices.  It also highlights concerns about the scope of data collection within the Windows Recall process.
+
+3. ✅ **Takeaways:** Signal prioritizes user privacy and proactively addresses potential privacy threats.  The implementation of this screenshot blocker demonstrates a commitment to safeguarding user data against potentially intrusive system processes.  It also raises questions about the transparency and necessity of data collection methods like "Windows Recall".

@@ -1,0 +1,2350 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a1929">
+<title>מחשבון ציון CAIQ — סקירת ספקי SaaS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+:root {
+  --bg: #f6f4ee;
+  --bg-card: #ffffff;
+  --ink: #0f172a;
+  --ink-soft: #475569;
+  --ink-faint: #94a3b8;
+  --line: #e2e1da;
+  --line-soft: #ecebe4;
+  --navy: #0a1929;
+  --navy-soft: #142a3f;
+  --accent: #c9531e;
+  --accent-soft: #e8714a;
+  --green: #2d7a4a;
+  --green-soft: #d4ebd9;
+  --yellow: #c08a1d;
+  --yellow-soft: #f5e6b8;
+  --orange: #c9531e;
+  --orange-soft: #f5d4c0;
+  --red: #b8342a;
+  --red-soft: #f5c8c4;
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.10);
+  --safe-bottom: env(safe-area-inset-bottom, 0);
+  --safe-top: env(safe-area-inset-top, 0);
+}
+html, body { height: 100%; }
+body {
+  font-family: 'Heebo', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -webkit-overflow-scrolling: touch;
+}
+.app { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+.sidebar { position: sticky; top: 0; height: 100vh; }
+@media (max-width: 1024px) {
+  .app { display: block; min-height: 100dvh; }
+  .sidebar { position: static; height: auto; }
+}
+button { font-family: inherit; }
+
+/* Sidebar (desktop) */
+.sidebar {
+  background: var(--navy);
+  color: #e8e6dc;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow-y: auto;
+  border-left: 1px solid #1e2f44;
+}
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #1e2f44;
+}
+.brand-mark {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--accent-soft);
+  text-transform: uppercase;
+}
+.brand-name { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin-top: 4px; }
+.brand-sub { font-size: 12px; color: #8a9bb0; margin-top: 2px; }
+
+.section-title {
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #6b7d94;
+  margin-bottom: 10px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.vendor-select-wrap { position: relative; }
+.vendor-select {
+  width: 100%;
+  background: #1e2f44;
+  color: #e8e6dc;
+  border: 1px solid #2c4159;
+  padding: 12px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 14px;
+  appearance: none;
+  cursor: pointer;
+  padding-left: 36px;
+}
+.vendor-select-wrap::after {
+  content: '▾';
+  position: absolute;
+  left: 14px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--accent-soft);
+  pointer-events: none;
+}
+.vendor-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 8px;
+}
+.vendor-btn {
+  background: #1e2f44;
+  border: 1px solid #2c4159;
+  color: #e8e6dc;
+  padding: 10px 8px;
+  border-radius: 5px;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  min-height: 40px;
+}
+.vendor-btn:hover, .vendor-btn:active { background: #2c4159; border-color: #3a5273; }
+.vendor-btn.danger:active, .vendor-btn.danger:hover { background: #5c1f1a; border-color: #8b3530; color: #f5c8c4; }
+
+.nav { display: flex; flex-direction: column; gap: 2px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #c5c8d0;
+  transition: all 0.15s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: right;
+  min-height: 44px;
+}
+.nav-item:hover, .nav-item:active { background: #1e2f44; color: #fff; }
+.nav-item.active { background: var(--accent); color: #fff; }
+.nav-item .icon {
+  width: 18px; height: 18px;
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.live-score {
+  background: linear-gradient(135deg, #142a3f 0%, #0a1929 100%);
+  border: 1px solid #2c4159;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+}
+.live-score-label {
+  font-size: 11px;
+  color: #8a9bb0;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+}
+.live-score-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 36px;
+  font-weight: 700;
+  margin: 6px 0 2px;
+  letter-spacing: -0.02em;
+}
+.live-score-tier { font-size: 12px; font-weight: 500; }
+.tier-low    { color: #5fb37c; }
+.tier-mid    { color: #e8c25c; }
+.tier-high   { color: var(--accent-soft); }
+.tier-crit   { color: #e8736a; }
+.tier-none   { color: #8a9bb0; }
+.live-score-detail {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: #6b7d94;
+  margin-top: 6px;
+}
+
+.sidebar-footnote {
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid #1e2f44;
+  font-size: 11px;
+  color: #6b7d94;
+  line-height: 1.6;
+}
+
+/* Mobile top bar */
+.mobile-topbar {
+  display: none;
+  position: sticky;
+  top: 0;
+  background: var(--navy);
+  color: #fff;
+  padding: 12px 16px;
+  padding-top: calc(12px + var(--safe-top));
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  z-index: 30;
+  border-bottom: 1px solid #1e2f44;
+}
+.mobile-brand {
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mobile-brand-mark {
+  background: var(--accent);
+  color: #fff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 3px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.05em;
+}
+.mobile-vendor-pill {
+  background: #1e2f44;
+  color: #e8e6dc;
+  border: 1px solid #2c4159;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  justify-content: space-between;
+  max-width: 70%;
+}
+.mobile-vendor-pill .pill-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mobile-vendor-pill .pill-arrow {
+  color: var(--accent-soft);
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.mobile-menu-btn {
+  background: #1e2f44;
+  border: 1px solid #2c4159;
+  color: #fff;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+/* Mobile bottom nav */
+.mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: #fff;
+  border-top: 1px solid var(--line);
+  padding: 8px 4px;
+  padding-bottom: calc(8px + var(--safe-bottom));
+  z-index: 30;
+  box-shadow: 0 -2px 12px rgba(15, 23, 42, 0.06);
+}
+.mobile-bottom-nav .row { display: flex; justify-content: space-around; }
+.mobile-nav-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 8px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--ink-faint);
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.15s;
+}
+.mobile-nav-btn .micon { font-size: 20px; line-height: 1; }
+.mobile-nav-btn.active { color: var(--accent); }
+.mobile-nav-btn:active { background: var(--bg); }
+
+/* Mobile sheet (slide-up drawer) */
+.sheet-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 25, 41, 0.5);
+  z-index: 40;
+  backdrop-filter: blur(2px);
+}
+.sheet-overlay.active { display: block; }
+.sheet {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: #fff;
+  border-radius: 16px 16px 0 0;
+  padding: 16px 20px;
+  padding-bottom: calc(20px + var(--safe-bottom));
+  z-index: 41;
+  max-height: 85vh;
+  overflow-y: auto;
+  transform: translateY(100%);
+  transition: transform 0.25s ease;
+  box-shadow: 0 -8px 32px rgba(0,0,0,0.2);
+}
+.sheet.active { transform: translateY(0); }
+.sheet-handle {
+  width: 36px; height: 4px;
+  background: var(--line);
+  border-radius: 2px;
+  margin: 0 auto 16px;
+}
+.sheet-title {
+  font-size: 16px; font-weight: 600;
+  margin-bottom: 12px;
+}
+.sheet-vendor-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.sheet-vendor-item {
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg-card);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  text-align: right;
+  width: 100%;
+  font-family: inherit;
+  color: var(--ink);
+}
+.sheet-vendor-item.active {
+  border-color: var(--accent);
+  background: var(--orange-soft);
+  font-weight: 600;
+}
+.sheet-vendor-item:active { background: var(--bg); }
+.sheet-vendor-score {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 13px;
+}
+.sheet-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.sheet-action {
+  padding: 12px;
+  border: 1px solid var(--line);
+  background: var(--bg-card);
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--ink);
+  min-height: 44px;
+}
+.sheet-action:active { background: var(--bg); }
+.sheet-action.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.sheet-action.danger { color: var(--red); border-color: var(--red-soft); }
+
+/* Main */
+.main { position: relative; }
+.topbar {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--line);
+  padding: 18px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.topbar-title { font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+.topbar-sub {
+  font-size: 12px;
+  color: var(--ink-faint);
+  margin-top: 2px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.export-group { display: flex; gap: 8px; }
+.btn {
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid var(--line);
+  background: var(--bg-card);
+  color: var(--ink);
+  transition: all 0.15s;
+  font-weight: 500;
+  min-height: 36px;
+}
+.btn:hover, .btn:active { border-color: var(--ink-faint); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+.btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-primary:hover, .btn-primary:active { background: #b04617; border-color: #b04617; }
+
+.content { padding: 32px; max-width: 1280px; padding-bottom: 60px; }
+.view { display: none; }
+.view.active { display: block; }
+
+.empty-state {
+  background: var(--bg-card);
+  border: 2px dashed var(--line);
+  border-radius: 12px;
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--ink-soft);
+}
+.empty-state h3 { font-size: 18px; margin-bottom: 8px; color: var(--ink); }
+.empty-state p { font-size: 14px; margin-bottom: 16px; }
+
+/* Dashboard */
+.dash-hero {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 32px;
+  margin-bottom: 24px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 32px;
+  align-items: center;
+}
+.dash-hero-info h2 {
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+}
+.dash-hero-vendor {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin-top: 4px;
+  word-break: break-word;
+}
+.dash-hero-meta {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px 24px;
+}
+.dash-hero-meta .meta-item { display: flex; flex-direction: column; gap: 2px; }
+.dash-hero-meta .meta-label {
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+}
+.dash-hero-meta .meta-value { font-size: 13px; color: var(--ink); }
+.dash-hero-meta a.meta-value { color: var(--accent); text-decoration: none; word-break: break-all; }
+
+.score-ring { position: relative; width: 180px; height: 180px; flex-shrink: 0; }
+.score-ring svg { transform: rotate(-90deg); }
+.score-ring-text {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+.score-ring-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 44px; font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.score-ring-pct { font-size: 14px; color: var(--ink-faint); }
+.score-ring-tier {
+  font-size: 12px; margin-top: 4px;
+  font-weight: 600; letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 0 8px;
+}
+
+.score-formula {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px 22px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+}
+.score-formula .step { text-align: center; }
+.score-formula .step-label {
+  font-size: 10px;
+  color: var(--ink-faint);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.score-formula .step-value { font-size: 18px; font-weight: 700; color: var(--ink); }
+.score-formula .op { font-size: 18px; color: var(--ink-faint); }
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.kpi {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 18px;
+}
+.kpi-label {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+}
+.kpi-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 28px; font-weight: 700;
+  margin-top: 6px; letter-spacing: -0.02em;
+}
+.kpi-bar {
+  margin-top: 10px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--line-soft);
+  overflow: hidden;
+}
+.kpi-bar-fill { height: 100%; background: var(--accent); transition: width 0.4s ease; }
+.kpi.green .kpi-value { color: var(--green); }
+.kpi.green .kpi-bar-fill { background: var(--green); }
+.kpi.red .kpi-value { color: var(--red); }
+.kpi.red .kpi-bar-fill { background: var(--red); }
+.kpi.yellow .kpi-value { color: var(--yellow); }
+.kpi.yellow .kpi-bar-fill { background: var(--yellow); }
+
+.panel {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+.panel-head {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.panel-title { font-size: 15px; font-weight: 600; }
+.panel-sub {
+  font-size: 12px;
+  color: var(--ink-faint);
+  font-family: 'JetBrains Mono', monospace;
+}
+.panel-body { padding: 22px; }
+
+.domain-bars { display: flex; flex-direction: column; gap: 14px; }
+.domain-bar-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 90px;
+  gap: 16px;
+  align-items: center;
+}
+.domain-bar-label { font-size: 13px; font-weight: 500; }
+.domain-bar-code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-faint);
+  margin-left: 6px;
+}
+.domain-bar-track {
+  height: 8px;
+  background: var(--line-soft);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.domain-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+.domain-bar-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; font-weight: 600;
+  text-align: left;
+}
+
+.blocker-list { display: flex; flex-direction: column; gap: 8px; }
+.blocker-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--red-soft);
+  border-right: 3px solid var(--red);
+  border-radius: 6px;
+  font-size: 13px;
+}
+.blocker-id {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--red);
+  background: #fff;
+  padding: 3px 7px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* Questionnaire */
+.qna-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 14px 18px;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.qna-progress {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.qna-progress strong { color: var(--ink); font-weight: 700; }
+.qna-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.search-box {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  padding: 9px 12px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 14px;
+  width: 220px;
+  min-height: 40px;
+}
+.search-box:focus { outline: none; border-color: var(--accent); }
+
+.domain-card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+.domain-head {
+  padding: 16px 20px;
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 16px;
+  align-items: center;
+  cursor: pointer;
+  background: var(--bg-card);
+  user-select: none;
+  border-bottom: 1px solid transparent;
+  transition: all 0.15s;
+}
+.domain-card.open .domain-head { border-bottom-color: var(--line); background: #fafaf6; }
+.chevron {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  color: var(--ink-faint);
+  transition: transform 0.2s;
+}
+.domain-card.open .chevron { transform: rotate(90deg); }
+.domain-name { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-code-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  background: var(--bg);
+  color: var(--ink-soft);
+  padding: 3px 7px;
+  border-radius: 4px;
+  margin-right: 8px;
+  border: 1px solid var(--line);
+}
+.domain-stats {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--ink-soft);
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.domain-stats .stat { display: inline-flex; align-items: center; gap: 4px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.dot.green { background: var(--green); }
+.dot.red { background: var(--red); }
+.dot.gray { background: var(--ink-faint); }
+.domain-mini-bar {
+  width: 80px;
+  height: 6px;
+  background: var(--line-soft);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.domain-mini-fill { height: 100%; transition: width 0.3s; }
+
+.questions { display: none; padding: 0; }
+.domain-card.open .questions { display: block; }
+
+.question {
+  padding: 14px 20px;
+  display: grid;
+  grid-template-columns: 90px 1fr auto;
+  gap: 16px;
+  align-items: start;
+  border-bottom: 1px solid var(--line-soft);
+}
+.question:last-child { border-bottom: none; }
+.question.has-blocker { background: linear-gradient(to left, transparent 0%, transparent 95%, var(--red) 95%, var(--red) 100%); }
+.question.violation { background: var(--red-soft); }
+.q-id {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-soft);
+  font-weight: 600;
+  padding-top: 4px;
+}
+.q-blocker-tag {
+  display: inline-block;
+  background: var(--red);
+  color: #fff;
+  font-size: 9px;
+  padding: 2px 5px;
+  border-radius: 3px;
+  margin-right: 4px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-top: 4px;
+}
+.q-main { display: flex; flex-direction: column; gap: 6px; }
+.q-text { font-size: 14px; color: var(--ink); padding-top: 4px; }
+.q-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 11px;
+  color: var(--ink-faint);
+  font-family: 'JetBrains Mono', monospace;
+  flex-wrap: wrap;
+}
+.q-link {
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: none;
+  border: none;
+  background: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+}
+.q-link:hover, .q-link:active { text-decoration: underline; }
+.q-detail {
+  display: none;
+  margin-top: 4px;
+  padding: 12px 14px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-right: 3px solid var(--accent);
+  border-radius: 6px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+.q-detail.open { display: block; }
+.q-detail-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.q-notes {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  font-family: inherit;
+  font-size: 13px;
+  background: var(--bg);
+  resize: vertical;
+  min-height: 36px;
+  color: var(--ink-soft);
+}
+.q-notes:focus { outline: none; border-color: var(--accent); background: #fff; }
+.answer-group {
+  display: flex;
+  gap: 4px;
+  background: var(--bg);
+  padding: 3px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+}
+.answer-btn {
+  padding: 8px 14px;
+  font-size: 13px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 4px;
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--ink-soft);
+  transition: all 0.15s;
+  white-space: nowrap;
+  min-height: 38px;
+}
+.answer-btn:hover, .answer-btn:active { background: #fff; color: var(--ink); }
+.answer-btn.active.yes { background: var(--green); color: #fff; }
+.answer-btn.active.no { background: var(--red); color: #fff; }
+.answer-btn.active.na { background: var(--ink-soft); color: #fff; }
+
+/* Compare */
+.compare-table {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.compare-table table { width: 100%; border-collapse: collapse; min-width: 600px; }
+.compare-table th, .compare-table td {
+  padding: 12px 14px;
+  text-align: right;
+  font-size: 13px;
+  border-bottom: 1px solid var(--line-soft);
+  white-space: nowrap;
+}
+.compare-table th {
+  background: var(--bg);
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--ink-soft);
+  border-bottom: 1px solid var(--line);
+}
+.compare-table tr:last-child td { border-bottom: none; }
+.compare-table .num { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+.compare-vendor-name { font-weight: 600; }
+.tier-pill {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+}
+.tier-pill.low  { background: var(--green-soft); color: var(--green); }
+.tier-pill.mid  { background: var(--yellow-soft); color: var(--yellow); }
+.tier-pill.high { background: var(--orange-soft); color: var(--orange); }
+.tier-pill.crit { background: var(--red-soft); color: var(--red); }
+
+.empty {
+  text-align: center;
+  padding: 60px 24px;
+  color: var(--ink-faint);
+}
+.empty h3 { font-size: 16px; color: var(--ink-soft); margin-bottom: 6px; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(10, 25, 41, 0.6);
+  display: none;
+  align-items: center; justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(4px);
+  padding: 16px;
+}
+.modal-overlay.active { display: flex; }
+.modal {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  width: 480px;
+  max-width: 100%;
+  max-height: 92vh;
+  max-height: 92dvh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+}
+.modal h3 {
+  font-size: 20px;
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+.modal .modal-sub {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+.modal .field { margin-bottom: 14px; }
+.modal label {
+  display: block;
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.modal label .req { color: var(--red); margin-right: 3px; }
+.modal label .opt {
+  color: var(--ink-faint);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: 'Heebo', sans-serif;
+  font-size: 11px;
+  margin-right: 4px;
+}
+.modal input, .modal textarea {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--ink);
+  background: var(--bg);
+  min-height: 42px;
+}
+.modal input:focus, .modal textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: #fff;
+}
+.modal textarea { resize: vertical; min-height: 60px; }
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+.modal-actions .btn { flex: 1; padding: 12px; min-height: 44px; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: calc(80px + var(--safe-bottom));
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: var(--ink);
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 6px;
+  font-size: 13px;
+  box-shadow: var(--shadow-lg);
+  z-index: 200;
+  opacity: 0;
+  transition: all 0.2s;
+  pointer-events: none;
+  max-width: 90%;
+  text-align: center;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* MOBILE */
+@media (max-width: 1024px) {
+  .sidebar { display: none; }
+  .topbar { display: none; }
+  .mobile-topbar { display: flex; }
+  .mobile-bottom-nav { display: block; }
+  .content {
+    padding: 16px;
+    padding-bottom: calc(80px + var(--safe-bottom));
+  }
+  .dash-hero {
+    grid-template-columns: 1fr;
+    text-align: center;
+    padding: 20px;
+    gap: 20px;
+  }
+  .dash-hero-info { display: flex; flex-direction: column; align-items: center; }
+  .dash-hero-vendor { font-size: 24px; }
+  .dash-hero-meta {
+    grid-template-columns: 1fr 1fr;
+    text-align: right;
+    width: 100%;
+    margin-top: 16px;
+  }
+  .score-ring { margin: 0 auto; }
+  .kpi-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .kpi { padding: 14px; }
+  .kpi-value { font-size: 22px; }
+  .panel-body { padding: 16px; }
+  .domain-bar-row {
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "label num" "track track";
+    gap: 6px;
+  }
+  .domain-bar-label { grid-area: label; }
+  .domain-bar-num { grid-area: num; }
+  .domain-bar-track { grid-area: track; }
+  .question {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 14px;
+  }
+  .q-id {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-top: 0;
+  }
+  .q-blocker-tag { margin-top: 0; }
+  .answer-group { width: 100%; }
+  .answer-btn { flex: 1; padding: 12px 8px; font-size: 14px; }
+  .domain-head {
+    grid-template-columns: auto 1fr;
+    grid-template-areas: "chev name" "stats stats";
+    gap: 10px;
+    padding: 14px;
+  }
+  .domain-head .chevron { grid-area: chev; }
+  .domain-head > div:nth-child(2) { grid-area: name; }
+  .domain-stats {
+    grid-area: stats;
+    justify-content: space-between;
+    width: 100%;
+    padding-top: 4px;
+    border-top: 1px solid var(--line-soft);
+    margin-top: 2px;
+  }
+  .domain-mini-bar { display: none; }
+  .qna-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px;
+  }
+  .search-box { width: 100%; }
+  .qna-actions { justify-content: space-between; }
+  .qna-actions .btn { flex: 1; }
+  .score-formula {
+    padding: 14px;
+    gap: 6px;
+    font-size: 12px;
+  }
+  .score-formula .step-value { font-size: 16px; }
+  .score-formula .op { font-size: 14px; }
+  .compare-table { border-radius: 8px; }
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--line); border-radius: 5px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ink-faint); }
+.sidebar ::-webkit-scrollbar-track { background: var(--navy); }
+.sidebar ::-webkit-scrollbar-thumb { background: #2c4159; }
+</style>
+</head>
+<body>
+
+<!-- Mobile top bar -->
+<div class="mobile-topbar">
+  <button class="mobile-vendor-pill" onclick="openVendorSheet()">
+    <span class="pill-name" id="mobileVendorName">—</span>
+    <span class="pill-arrow">▾</span>
+  </button>
+  <div class="mobile-brand">
+    <span class="mobile-brand-mark">CAIQ</span>
+  </div>
+  <button class="mobile-menu-btn" onclick="openExportSheet()" title="ייצוא">⇩</button>
+</div>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">CSA · CCM v4</div>
+      <div class="brand-name">CAIQ Scoring</div>
+      <div class="brand-sub">מחשבון ציון סיכון לספקי SaaS</div>
+    </div>
+
+    <div class="vendor-section">
+      <div class="section-title">ספק נוכחי</div>
+      <div class="vendor-select-wrap">
+        <select id="vendorSelect" class="vendor-select"></select>
+      </div>
+      <div class="vendor-actions">
+        <button class="vendor-btn" onclick="openNewVendorModal()">+ ספק חדש</button>
+        <button class="vendor-btn" onclick="editVendorModal()">ערוך פרטים</button>
+        <button class="vendor-btn" onclick="duplicateVendor()">שכפל</button>
+        <button class="vendor-btn danger" onclick="deleteVendor()">מחק</button>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="section-title">תפריט</div>
+      <nav class="nav">
+        <button class="nav-item active" data-view="dashboard">
+          <span class="icon">▣</span> לוח מחוונים
+        </button>
+        <button class="nav-item" data-view="questionnaire">
+          <span class="icon">≡</span> שאלון CAIQ
+        </button>
+        <button class="nav-item" data-view="compare">
+          <span class="icon">⇄</span> השוואת ספקים
+        </button>
+      </nav>
+    </div>
+
+    <div class="live-score" id="liveScore">
+      <div class="live-score-label">ציון סופי</div>
+      <div class="live-score-value" id="liveScoreValue">—</div>
+      <div class="live-score-tier tier-none" id="liveScoreTier">לא הוזנו תשובות</div>
+      <div class="live-score-detail" id="liveScoreDetail"></div>
+    </div>
+
+    <div class="sidebar-footnote">
+      17 דומיינים · 129 שאלות · 43 חסמות<br>
+      קנס: 3 נק׳ לכל חסמת שנכשלה<br>
+      נשמר מקומית בדפדפן
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="topbarTitle">לוח מחוונים</div>
+        <div class="topbar-sub" id="topbarSub">CAIQ · Cloud Controls Matrix v4</div>
+      </div>
+      <div class="export-group">
+        <button class="btn" onclick="exportJSON()">JSON</button>
+        <button class="btn" onclick="exportXLSX()">Excel</button>
+        <button class="btn btn-primary" onclick="exportPDF()">PDF</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="view active" id="view-dashboard">
+        <div id="dashboardContent"></div>
+      </div>
+
+      <div class="view" id="view-questionnaire">
+        <div class="qna-toolbar">
+          <div class="qna-progress">התקדמות: <strong id="qnaProgress">0 / 129</strong></div>
+          <div class="qna-actions">
+            <input type="text" class="search-box" id="searchBox" placeholder="חיפוש...">
+            <button class="btn" onclick="expandAll(true)">פתח הכל</button>
+            <button class="btn" onclick="expandAll(false)">סגור הכל</button>
+          </div>
+        </div>
+        <div id="questionnaire"></div>
+      </div>
+
+      <div class="view" id="view-compare">
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">השוואת ספקים</div>
+              <div class="panel-sub">Side-by-side vendor comparison</div>
+            </div>
+          </div>
+          <div class="panel-body" id="compareBody"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Mobile bottom nav -->
+<div class="mobile-bottom-nav">
+  <div class="row">
+    <button class="mobile-nav-btn active" data-view="dashboard">
+      <span class="micon">▣</span>
+      <span>לוח</span>
+    </button>
+    <button class="mobile-nav-btn" data-view="questionnaire">
+      <span class="micon">≡</span>
+      <span>שאלון</span>
+    </button>
+    <button class="mobile-nav-btn" data-view="compare">
+      <span class="micon">⇄</span>
+      <span>השוואה</span>
+    </button>
+  </div>
+</div>
+
+<!-- Vendor switcher sheet (mobile) -->
+<div class="sheet-overlay" id="vendorSheetOverlay" onclick="closeSheets()"></div>
+<div class="sheet" id="vendorSheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title">ספקים</div>
+  <div class="sheet-vendor-list" id="sheetVendorList"></div>
+  <div class="sheet-actions">
+    <button class="sheet-action primary" onclick="closeSheets(); openNewVendorModal()">+ ספק חדש</button>
+    <button class="sheet-action" onclick="closeSheets(); editVendorModal()">ערוך פרטים</button>
+    <button class="sheet-action" onclick="closeSheets(); duplicateVendor()">שכפל</button>
+    <button class="sheet-action danger" onclick="closeSheets(); deleteVendor()">מחק ספק</button>
+  </div>
+</div>
+
+<!-- Export sheet (mobile) -->
+<div class="sheet" id="exportSheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title">ייצוא דוח</div>
+  <div class="sheet-actions" style="grid-template-columns: 1fr;">
+    <button class="sheet-action primary" onclick="closeSheets(); exportPDF()">PDF — דוח מנהלים</button>
+    <button class="sheet-action" onclick="closeSheets(); exportXLSX()">Excel — נתונים מלאים</button>
+    <button class="sheet-action" onclick="closeSheets(); exportJSON()">JSON — לאינטגרציה</button>
+  </div>
+</div>
+
+<!-- Vendor Modal -->
+<div class="modal-overlay" id="vendorModal">
+  <div class="modal">
+    <h3 id="modalTitle">הוספת ספק חדש</h3>
+    <div class="modal-sub" id="modalSub">מלאו פרטי הספק להערכה. שדות עם <span style="color:var(--red)">*</span> חובה.</div>
+
+    <div class="field">
+      <label><span class="req">*</span>שם הספק</label>
+      <input type="text" id="f_name" placeholder="למשל: Acme SaaS Inc." autocomplete="off">
+    </div>
+    <div class="field">
+      <label>שם המעריך <span class="opt">(שלך)</span></label>
+      <input type="text" id="f_assessor" placeholder="למשל: רמי כהן" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>תאריך הערכה</label>
+      <input type="date" id="f_date">
+    </div>
+    <div class="field">
+      <label>איש קשר אצל הספק <span class="opt">(אופציונלי)</span></label>
+      <input type="text" id="f_contact" placeholder="שם / אימייל / תפקיד" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>אתר הספק <span class="opt">(אופציונלי)</span></label>
+      <input type="url" id="f_url" placeholder="https://..." autocomplete="off">
+    </div>
+    <div class="field">
+      <label>הערות התקשרות <span class="opt">(אופציונלי)</span></label>
+      <textarea id="f_notes" placeholder="הקשר עסקי, סוג נתונים, ייעוד..."></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="saveVendorModal()">שמור</button>
+      <button class="btn" id="modalCancelBtn" onclick="closeModal()">ביטול</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const DOMAINS = [{"code":"AIS","name":"Application & Interface Security","weight":6,"weight_normalized":5.45},{"code":"BCR","name":"Business Continuity & Resilience","weight":7,"weight_normalized":6.36},{"code":"CCC","name":"Change Control & Configuration","weight":5,"weight_normalized":4.55},{"code":"CEK","name":"Cryptography & Key Management","weight":8,"weight_normalized":7.27},{"code":"DCS","name":"Datacenter Security","weight":5,"weight_normalized":4.55},{"code":"DSP","name":"Data Security & Privacy","weight":10,"weight_normalized":9.09},{"code":"GRC","name":"Governance, Risk & Compliance","weight":5,"weight_normalized":4.55},{"code":"HRS","name":"Human Resources","weight":4,"weight_normalized":3.64},{"code":"IAM","name":"Identity & Access Management","weight":12,"weight_normalized":10.91},{"code":"IPY","name":"Interoperability & Portability","weight":3,"weight_normalized":2.73},{"code":"IVS","name":"Infrastructure & Virtualization","weight":7,"weight_normalized":6.36},{"code":"LOG","name":"Logging & Monitoring","weight":6,"weight_normalized":5.45},{"code":"SEF","name":"Security Incident Management","weight":8,"weight_normalized":7.27},{"code":"STA","name":"Supply Chain Management","weight":6,"weight_normalized":5.45},{"code":"TVM","name":"Threat & Vulnerability Mgmt","weight":7,"weight_normalized":6.36},{"code":"UEM","name":"Endpoint Management","weight":4,"weight_normalized":3.64},{"code":"AAC","name":"Audit Assurance & Compliance","weight":7,"weight_normalized":6.36}];
+const QUESTIONS = [{"id":"AIS-01.1","question":"האם ישנה מדיניות אפליקציות ותוכנה מוגדרת?","domain":"Application & Interface Security","blocker":false},{"id":"AIS-01.2","question":"האם המדיניות מתועדת ומיושמת?","domain":"Application & Interface Security","blocker":false},{"id":"AIS-02.1","question":"האם נעשה שימוש בגישת Security by Design?","domain":"Application & Interface Security","blocker":true},{"id":"AIS-02.2","question":"האם קיים תהליך בדיקת אבטחה לפני השקת תכונות?","domain":"Application & Interface Security","blocker":true},{"id":"AIS-03.1","question":"האם קיים תהליך Secure SDLC?","domain":"Application & Interface Security","blocker":true},{"id":"AIS-04.1","question":"האם מתבצעות בדיקות אבטחה אוטומטיות (SAST/DAST)?","domain":"Application & Interface Security","blocker":false},{"id":"AIS-04.2","question":"האם קיים תהליך Code Review לאבטחה?","domain":"Application & Interface Security","blocker":false},{"id":"AIS-05.1","question":"האם ישנה בדיקת תלויות ורכיבי צד שלישי (SCA)?","domain":"Application & Interface Security","blocker":false},{"id":"AIS-06.1","question":"האם קיים API Gateway עם הגבלות גישה?","domain":"Application & Interface Security","blocker":false},{"id":"AIS-06.2","question":"האם ממשקי API מוגנים מפני שימוש לרעה?","domain":"Application & Interface Security","blocker":true},{"id":"BCR-01.1","question":"האם קיים תוכנית המשכיות עסקית (BCP)?","domain":"Business Continuity & Resilience","blocker":true},{"id":"BCR-01.2","question":"האם התוכנית נבדקה ב-12 החודשים האחרונים?","domain":"Business Continuity & Resilience","blocker":false},{"id":"BCR-02.1","question":"האם קיים תוכנית התאוששות מאסון (DRP)?","domain":"Business Continuity & Resilience","blocker":true},{"id":"BCR-02.2","question":"האם ה-DRP נבדק ב-12 החודשים האחרונים?","domain":"Business Continuity & Resilience","blocker":false},{"id":"BCR-03.1","question":"האם RTO מוגדר וידוע?","domain":"Business Continuity & Resilience","blocker":false},{"id":"BCR-03.2","question":"האם RPO מוגדר וידוע?","domain":"Business Continuity & Resilience","blocker":false},{"id":"BCR-04.1","question":"האם גיבויים מתבצעים לפחות יומיים?","domain":"Business Continuity & Resilience","blocker":true},{"id":"BCR-04.2","question":"האם גיבויים נשמרים באתר גיאוגרפי שני?","domain":"Business Continuity & Resilience","blocker":false},{"id":"BCR-05.1","question":"האם קיימת יתירות (Redundancy) לתשתית?","domain":"Business Continuity & Resilience","blocker":false},{"id":"BCR-05.2","question":"האם תשתיות קריטיות כפולות?","domain":"Business Continuity & Resilience","blocker":false},{"id":"BCR-06.1","question":"האם SLA זמינות הוא 99.9% או יותר?","domain":"Business Continuity & Resilience","blocker":false},{"id":"BCR-11.1","question":"האם מתבצעות תרגילי Failover תקופתיים?","domain":"Business Continuity & Resilience","blocker":false},{"id":"CCC-01.1","question":"האם קיים תהליך ניהול שינויים?","domain":"Change Control & Configuration","blocker":false},{"id":"CCC-02.1","question":"האם כל שינוי מאושר לפני יישום?","domain":"Change Control & Configuration","blocker":true},{"id":"CCC-03.1","question":"האם קיים CI/CD Pipeline?","domain":"Change Control & Configuration","blocker":false},{"id":"CCC-04.1","question":"האם קיים ניהול תצורה (Configuration Management)?","domain":"Change Control & Configuration","blocker":false},{"id":"CCC-05.1","question":"האם שינויים במוצר נבדקים בסביבת TEST לפני PROD?","domain":"Change Control & Configuration","blocker":true},{"id":"CCC-06.1","question":"האם קיים Rollback לשינויים כושלים?","domain":"Change Control & Configuration","blocker":false},{"id":"CCC-07.1","question":"האם שינויים מתועדים ומוצגים ללקוחות?","domain":"Change Control & Configuration","blocker":false},{"id":"CEK-01.1","question":"האם קיימת מדיניות הצפנה מתועדת?","domain":"Cryptography & Key Management","blocker":true},{"id":"CEK-02.1","question":"האם נתונים מוצפנים במנוחה (at rest)?","domain":"Cryptography & Key Management","blocker":true},{"id":"CEK-02.2","question":"האם אלגוריתם ההצפנה הוא AES-256 או שווה?","domain":"Cryptography & Key Management","blocker":true},{"id":"CEK-03.1","question":"האם נתונים מוצפנים במעבר (in transit) עם TLS 1.2+?","domain":"Cryptography & Key Management","blocker":true},{"id":"CEK-04.1","question":"האם קיים ניהול מפתחות הצפנה (KMS)?","domain":"Cryptography & Key Management","blocker":false},{"id":"CEK-04.2","question":"האם מפתחות מוחלפים תקופתית?","domain":"Cryptography & Key Management","blocker":false},{"id":"CEK-05.1","question":"האם ללקוחות אפשרות לנהל מפתחות משלהם?","domain":"Cryptography & Key Management","blocker":false},{"id":"CEK-06.1","question":"האם קיים HSM לשמירת מפתחות?","domain":"Cryptography & Key Management","blocker":false},{"id":"DCS-01.1","question":"האם מרכזי הנתונים מאובטחים פיזית?","domain":"Datacenter Security","blocker":true},{"id":"DCS-02.1","question":"האם קיים בקרת גישה ביומטרית למרכז נתונים?","domain":"Datacenter Security","blocker":false},{"id":"DCS-03.1","question":"האם מרכזי הנתונים עומדים בתקני ISO 27001 או SOC2?","domain":"Datacenter Security","blocker":true},{"id":"DCS-04.1","question":"האם קיים ניטור וידאו (CCTV) במרכז נתונים?","domain":"Datacenter Security","blocker":false},{"id":"DCS-05.1","question":"האם קיים UPS ומערכת גיבוי חשמל?","domain":"Datacenter Security","blocker":false},{"id":"DCS-06.1","question":"האם מיקום מרכז נתונים גאוגרפי מגוון?","domain":"Datacenter Security","blocker":false},{"id":"DSP-01.1","question":"האם קיימת מדיניות פרטיות מפורסמת?","domain":"Data Security & Privacy","blocker":true},{"id":"DSP-02.1","question":"האם נתוני לקוחות מסווגים לפי רגישות?","domain":"Data Security & Privacy","blocker":false},{"id":"DSP-03.1","question":"האם קיים תהליך מחיקת נתונים בבקשת לקוח?","domain":"Data Security & Privacy","blocker":true},{"id":"DSP-04.1","question":"האם נתוני לקוחות מבודדים (Multi-Tenancy Isolation)?","domain":"Data Security & Privacy","blocker":true},{"id":"DSP-05.1","question":"האם קיים Data Retention Policy מתועד?","domain":"Data Security & Privacy","blocker":false},{"id":"DSP-06.1","question":"האם עובדי הספק ניגשים לנתוני לקוחות רק לפי צורך?","domain":"Data Security & Privacy","blocker":true},{"id":"DSP-07.1","question":"האם הספק עומד ב-GDPR (אם רלוונטי)?","domain":"Data Security & Privacy","blocker":false},{"id":"DSP-07.2","question":"האם הספק עומד ב-CCPA (אם רלוונטי)?","domain":"Data Security & Privacy","blocker":false},{"id":"DSP-08.1","question":"האם קיים DPA (Data Processing Agreement)?","domain":"Data Security & Privacy","blocker":false},{"id":"DSP-09.1","question":"האם קיים תהליך Export נתונים ללקוח?","domain":"Data Security & Privacy","blocker":false},{"id":"DSP-10.1","question":"האם ניתן לעיין בנתונים ולתקנם (Right to Access)?","domain":"Data Security & Privacy","blocker":false},{"id":"DSP-17.1","question":"האם נתונים אינם משותפים עם צדדים שלישיים ללא אישור?","domain":"Data Security & Privacy","blocker":true},{"id":"GRC-01.1","question":"האם קיים CISO או תפקיד אבטחה בכיר?","domain":"Governance, Risk & Compliance","blocker":true},{"id":"GRC-02.1","question":"האם ישנה מדיניות אבטחת מידע מאושרת על ידי הנהלה?","domain":"Governance, Risk & Compliance","blocker":true},{"id":"GRC-03.1","question":"האם מתבצעות הערכות סיכון תקופתיות?","domain":"Governance, Risk & Compliance","blocker":false},{"id":"GRC-04.1","question":"האם קיים תהליך ניהול ציות (Compliance)?","domain":"Governance, Risk & Compliance","blocker":false},{"id":"GRC-05.1","question":"האם קיים ועדת אבטחה פנימית?","domain":"Governance, Risk & Compliance","blocker":false},{"id":"GRC-06.1","question":"האם מסמכי המדיניות מתעדכנים לפחות אחת לשנה?","domain":"Governance, Risk & Compliance","blocker":false},{"id":"HRS-01.1","question":"האם מתבצעות בדיקות רקע לעובדים?","domain":"Human Resources","blocker":true},{"id":"HRS-02.1","question":"האם עובדים מקבלים הדרכת אבטחה בקבלה לעבודה?","domain":"Human Resources","blocker":false},{"id":"HRS-03.1","question":"האם מתקיימות הדרכות אבטחה שנתיות?","domain":"Human Resources","blocker":false},{"id":"HRS-04.1","question":"האם קיים תהליך Offboarding מסודר?","domain":"Human Resources","blocker":true},{"id":"HRS-05.1","question":"האם הרשאות נשללות מיידית עם עזיבת עובד?","domain":"Human Resources","blocker":true},{"id":"HRS-06.1","question":"האם עובדים חתמו על NDA?","domain":"Human Resources","blocker":false},{"id":"IAM-01.1","question":"האם קיימת מדיניות IAM מתועדת?","domain":"Identity & Access Management","blocker":true},{"id":"IAM-02.1","question":"האם נעשה שימוש ב-MFA לגישה מנהלתית?","domain":"Identity & Access Management","blocker":true},{"id":"IAM-02.2","question":"האם MFA נדרש לכל המשתמשים?","domain":"Identity & Access Management","blocker":true},{"id":"IAM-03.1","question":"האם עקרון הרשאות מינימום (Least Privilege) מיושם?","domain":"Identity & Access Management","blocker":true},{"id":"IAM-04.1","question":"האם קיים סקירת הרשאות תקופתית (Access Review)?","domain":"Identity & Access Management","blocker":false},{"id":"IAM-05.1","question":"האם קיים Single Sign-On (SSO)?","domain":"Identity & Access Management","blocker":false},{"id":"IAM-06.1","question":"האם חשבונות שאינם בשימוש מושבתים אוטומטית?","domain":"Identity & Access Management","blocker":false},{"id":"IAM-07.1","question":"האם קיים ניטור גישה חריגה?","domain":"Identity & Access Management","blocker":false},{"id":"IAM-08.1","question":"האם קיים Privileged Access Management (PAM)?","domain":"Identity & Access Management","blocker":false},{"id":"IAM-09.1","question":"האם מדיניות סיסמאות עומדת בתקנים (12+ תווים)?","domain":"Identity & Access Management","blocker":false},{"id":"IAM-10.1","question":"האם גישה מרחוק מוגנת ב-VPN?","domain":"Identity & Access Management","blocker":false},{"id":"IAM-13.1","question":"האם קיים RBAC (Role-Based Access Control)?","domain":"Identity & Access Management","blocker":true},{"id":"IPY-01.1","question":"האם קיימת תיעוד API לייצוא נתונים?","domain":"Interoperability & Portability","blocker":false},{"id":"IPY-02.1","question":"האם נתונים ניתנים לייצוא בפורמטים סטנדרטיים?","domain":"Interoperability & Portability","blocker":false},{"id":"IPY-03.1","question":"האם קיים תהליך Migration מהשירות?","domain":"Interoperability & Portability","blocker":false},{"id":"IPY-04.1","question":"האם ישנה תמיכה בסטנדרטים פתוחים?","domain":"Interoperability & Portability","blocker":false},{"id":"IVS-01.1","question":"האם קיים בידוד רשת (Network Segmentation)?","domain":"Infrastructure & Virtualization","blocker":true},{"id":"IVS-02.1","question":"האם קיים Firewall ו-IDS/IPS?","domain":"Infrastructure & Virtualization","blocker":true},{"id":"IVS-03.1","question":"האם מכונות וירטואליות מבודדות בין לקוחות?","domain":"Infrastructure & Virtualization","blocker":true},{"id":"IVS-04.1","question":"האם קיים ניהול תצורה לתשתית (IaC)?","domain":"Infrastructure & Virtualization","blocker":false},{"id":"IVS-06.1","question":"האם פורטים ושירותים מוגבלים למינימום הנחוץ?","domain":"Infrastructure & Virtualization","blocker":false},{"id":"IVS-07.1","question":"האם קיים WAF (Web Application Firewall)?","domain":"Infrastructure & Virtualization","blocker":false},{"id":"IVS-09.1","question":"האם קיים בדיקת Penetration Test לתשתית?","domain":"Infrastructure & Virtualization","blocker":false},{"id":"LOG-01.1","question":"האם קיימת מדיניות לוגים מתועדת?","domain":"Logging & Monitoring","blocker":false},{"id":"LOG-02.1","question":"האם לוגים נשמרים לפחות 12 חודשים?","domain":"Logging & Monitoring","blocker":false},{"id":"LOG-03.1","question":"האם קיים SIEM לניטור מרכזי?","domain":"Logging & Monitoring","blocker":false},{"id":"LOG-04.1","question":"האם לוגי גישה נשמרים?","domain":"Logging & Monitoring","blocker":true},{"id":"LOG-05.1","question":"האם ישנם התראות על פעילות חשודה?","domain":"Logging & Monitoring","blocker":true},{"id":"LOG-06.1","question":"האם לוגים מוגנים מפני שינוי?","domain":"Logging & Monitoring","blocker":false},{"id":"LOG-09.1","question":"האם ניתן לגשת ללוגים בבקשת לקוח?","domain":"Logging & Monitoring","blocker":false},{"id":"SEF-01.1","question":"האם קיים תהליך Incident Response מתועד?","domain":"Security Incident Management","blocker":true},{"id":"SEF-02.1","question":"האם קיימת צוות CSIRT או שוות ערך?","domain":"Security Incident Management","blocker":false},{"id":"SEF-03.1","question":"האם לקוחות מקבלים הודעה על אירועי אבטחה תוך 72 שעות?","domain":"Security Incident Management","blocker":true},{"id":"SEF-04.1","question":"האם מתבצעות תרגילי Tabletop תקופתיים?","domain":"Security Incident Management","blocker":false},{"id":"SEF-05.1","question":"האם ישנה שיטה לדיווח על פרצות אבטחה?","domain":"Security Incident Management","blocker":false},{"id":"SEF-06.1","question":"האם קיים Bug Bounty Program?","domain":"Security Incident Management","blocker":false},{"id":"SEF-07.1","question":"האם ישנו ערוץ גילוי אחראי (Responsible Disclosure)?","domain":"Security Incident Management","blocker":false},{"id":"SEF-08.1","question":"האם מתבצע Post-Mortem לאחר אירועים?","domain":"Security Incident Management","blocker":false},{"id":"STA-01.1","question":"האם קיים תהליך הערכת ספקי משנה?","domain":"Supply Chain Management","blocker":false},{"id":"STA-02.1","question":"האם ספקי ענן של הספק ידועים ומתועדים?","domain":"Supply Chain Management","blocker":false},{"id":"STA-03.1","question":"האם קיים חוזה DPA עם ספקי משנה?","domain":"Supply Chain Management","blocker":false},{"id":"STA-04.1","question":"האם לקוחות מקבלים הודעה על שינוי ספק ענן?","domain":"Supply Chain Management","blocker":false},{"id":"STA-05.1","question":"האם ספקי משנה קריטיים מוערכים באבטחה?","domain":"Supply Chain Management","blocker":true},{"id":"STA-09.1","question":"האם הספק מפרסם את רשימת תת-המעבדים?","domain":"Supply Chain Management","blocker":false},{"id":"TVM-01.1","question":"האם מתבצע סריקת פגיעויות שוטפת?","domain":"Threat & Vulnerability Mgmt","blocker":true},{"id":"TVM-02.1","question":"האם פגיעויות קריטיות מתוקנות תוך 30 יום?","domain":"Threat & Vulnerability Mgmt","blocker":true},{"id":"TVM-03.1","question":"האם מתבצע Penetration Test חיצוני לפחות אחת לשנה?","domain":"Threat & Vulnerability Mgmt","blocker":true},{"id":"TVM-04.1","question":"האם קיים תהליך Patch Management?","domain":"Threat & Vulnerability Mgmt","blocker":false},{"id":"TVM-05.1","question":"האם קיים ניטור Threat Intelligence?","domain":"Threat & Vulnerability Mgmt","blocker":false},{"id":"TVM-06.1","question":"האם ניהול פגיעויות כולל קוד צד שלישי?","domain":"Threat & Vulnerability Mgmt","blocker":false},{"id":"TVM-09.1","question":"האם תוצאות Pen Test משותפות עם לקוחות (תמצית)?","domain":"Threat & Vulnerability Mgmt","blocker":false},{"id":"UEM-01.1","question":"האם קיים MDM לניהול מכשירים?","domain":"Endpoint Management","blocker":false},{"id":"UEM-02.1","question":"האם מכשירים ניידים מוצפנים?","domain":"Endpoint Management","blocker":false},{"id":"UEM-03.1","question":"האם קיים Remote Wipe למכשירים אבודים?","domain":"Endpoint Management","blocker":false},{"id":"UEM-06.1","question":"האם Endpoint Protection פרוס על כל המכשירים?","domain":"Endpoint Management","blocker":true},{"id":"AAC-01.1","question":"האם הספק מחזיק SOC 2 Type II?","domain":"Audit Assurance & Compliance","blocker":true},{"id":"AAC-01.2","question":"האם הספק מחזיק ISO 27001?","domain":"Audit Assurance & Compliance","blocker":false},{"id":"AAC-02.1","question":"האם ביקורת פנימית מתבצעת לפחות אחת לשנה?","domain":"Audit Assurance & Compliance","blocker":false},{"id":"AAC-03.1","question":"האם ביקורת חיצונית מתבצעת?","domain":"Audit Assurance & Compliance","blocker":false},{"id":"AAC-04.1","question":"האם תוצאות ביקורת זמינות ללקוחות?","domain":"Audit Assurance & Compliance","blocker":false},{"id":"AAC-05.1","question":"האם קיים תהליך ניהול ממצאי ביקורת?","domain":"Audit Assurance & Compliance","blocker":false},{"id":"AAC-06.1","question":"האם הספק מפורסם בCSA STAR Registry?","domain":"Audit Assurance & Compliance","blocker":false}];
+const RISKS = {"AIS-01.1":"ללא מדיניות אפליקציות מוגדרת אין סטנדרט אבטחה אחיד — פיתוח לא מובנה מוביל לפגיעויות חוזרות וקושי לאכוף בקרות.","AIS-01.2":"מדיניות שאינה מתועדת ומיושמת היא עלה תאנה — היא לא מספקת הגנה אמיתית ולא תעבור ביקורת.","AIS-02.1":"ללא Security by Design, פגיעויות מוטמעות בשלבי תכנון ויקרות לתיקון בייצור — עלות תיקון פי 30 לעומת תיקון בעיצוב.","AIS-02.2":"השקת תכונות ללא בדיקת אבטחה = חשיפה ישירה של פגיעויות ללקוחות. דוגמאות: IDOR, broken auth, exposed APIs.","AIS-03.1":"ללא Secure SDLC אין שלבי בקרה (threat modeling, code review, security testing) — פגיעויות מגיעות לייצור באופן שיטתי.","AIS-04.1":"ללא SAST/DAST פגיעויות נפוצות (XSS, SQLi, deserialization) לא מתגלות לפני ייצור — תלות מלאה בגילוי בפועל או בידי תוקפים.","AIS-04.2":"ללא code review אבטחתי, שגיאות לוגיות וסודות מוטמעים בקוד עוברים לייצור — מקור עיקרי לדליפת מפתחות וקרדנציאלים.","AIS-05.1":"ללא SCA, פגיעויות בספריות צד שלישי (Log4Shell, Spring4Shell) לא מנוטרות — 80% מקוד מודרני הוא תלויות.","AIS-06.1":"API Gateway ללא הגבלות חושף את כל ה-APIs ל-DDoS, abuse ו-data scraping — אין rate limiting או auth ברירת מחדל.","AIS-06.2":"API לא מוגן = OWASP API Top 10 כולו: BOLA, broken auth, excessive data exposure. דליפות נתונים מסיביות.","BCR-01.1":"ללא BCP, אירוע משבש (אסון, ransomware, downtime ממושך) ישבש שירות ללא תוכנית התאוששות — אובדן הכנסה ולקוחות.","BCR-01.2":"BCP שלא נבדק שנה = BCP שלא עובד. תוכניות מיושנות מתבררות ככשלות בדיוק במשבר.","BCR-02.1":"ללא DRP, אובדן Data Center או region יגרום לדאון ארוך — פגיעה ב-SLA, חשיפה משפטית, נזק תדמיתי.","BCR-02.2":"DRP לא נבדק = הימור — הספק לא יודע אם ההתאוששות תעבוד עד שהיא נדרשת בפועל.","BCR-03.1":"ללא RTO מוגדר, אין מחויבות לזמן התאוששות — לקוחות לא יודעים מתי השירות יחזור, אין תכנון תלות עסקית.","BCR-03.2":"ללא RPO, אין מחויבות לאובדן נתונים מקסימלי — אובדן שעות או ימים של עבודה אפשרי באירוע.","BCR-04.1":"גיבויים פחות מיומיים = אובדן עד 24 שעות עבודה באירוע — לרוב תרחישים זה אובדן בלתי קביל.","BCR-04.2":"גיבוי באתר אחד = single point of failure — שריפה, שיטפון או הצפנת ransomware ימחקו גם את הגיבוי.","BCR-05.1":"ללא יתירות, כשל בודד (שרת, קישור רשת) מפיל את השירות — דאון מתוכנן ולא מתוכנן ארוך מהמקובל.","BCR-05.2":"תשתית קריטית לא כפולה = SPOF ידוע מראש. אסטרטגיית שרידות חלקית בלבד.","BCR-06.1":"SLA נמוך מ-99.9% = מעל 8.7 שעות דאון בשנה. לא מקובל לשירות עסקי קריטי.","BCR-11.1":"ללא תרגילי Failover, מנגנון היתירות לא מוכח — failover אוטומטי לעיתים קרובות נכשל ראשון בלייב.","CCC-01.1":"ללא ניהול שינויים, פריסות לא מבוקרות גורמות לתקלות, regression ו-misconfiguration — סיבה ראשונה לדאונים.","CCC-02.1":"שינויים ללא אישור = שטח פגיעות פתוח לטעויות אדם, פעולות זדוניות מבפנים, ושינויים לא מתואמים.","CCC-03.1":"ללא CI/CD פריסות ידניות = שגיאות אדם, חוסר עקביות, תיעוד חלקי. גם פגיעה ב-audit trail.","CCC-04.1":"ללא ניהול תצורה (configuration drift) = שרתים זהים מתחילים להתבדל, פגיעויות מתגלות במקומות לא צפויים.","CCC-05.1":"פריסה ישירה ל-PROD = bugs ופגיעויות מגיעות ללקוחות. תקלות שיכלו להתגלות בבדיקה.","CCC-06.1":"ללא Rollback, תקלה בפריסה = דאון ארוך עד תיקון — במקום שניות עד החזרה לגרסה קודמת.","CCC-07.1":"שינויים לא מתועדים ללקוחות = הפתעות, שבירת אינטגרציות, אי-עמידה בתקני ניהול שינויים של הלקוח.","CEK-01.1":"ללא מדיניות הצפנה, כל צוות בוחר אלגוריתם משלו — שימוש ב-DES, MD5, אלגוריתמים שבורים, או הצפנה לא קיימת.","CEK-02.1":"נתונים לא מוצפנים at-rest = גניבת דיסק/גיבוי = דליפת כל הנתונים. דרישה רגולטורית בסיסית (GDPR, HIPAA, PCI).","CEK-02.2":"אלגוריתם חלש מ-AES-256 (DES, 3DES, RC4) = הצפנה שבירה — תוקף יכול לפענח עם משאבים מודרניים.","CEK-03.1":"תעבורה לא מוצפנת או TLS<1.2 = MITM, האזנה, גניבת קרדנציאלים. TLS 1.0/1.1 מוגדרים כשבורים.","CEK-04.1":"ללא KMS, מפתחות מנוהלים ידנית = דליפה (קוד, גיט, קונפיגים), חוסר rotation, אין audit.","CEK-04.2":"מפתחות שלא מתחלפים = פעם שמפתח דולף, הוא תקף לנצח. דרישת PCI-DSS מפורשת.","CEK-05.1":"ללא BYOK/CMEK, הלקוח לא שולט במפתחות — לא יכול לקיים separation of duties מול הספק, חשיפה רגולטורית.","CEK-06.1":"מפתחות בלי HSM = שמורים בתוכנה, חשיפה לחילוץ ב-memory dump או compromise של השרת.","DCS-01.1":"אבטחה פיזית חלשה = גישה לחומרה = bypass של כל בקרת תוכנה. תקיפה פיזית היא הקיצור הקצר ביותר.","DCS-02.1":"ללא ביומטריה, גישה למרכז נתונים על בסיס כרטיס בלבד — קל לזיוף, גניבה, או piggybacking.","DCS-03.1":"DC ללא ISO 27001/SOC 2 = אין אימות חיצוני לבקרות הפיזיות והתפעוליות. סיכון לציות הלקוח.","DCS-04.1":"ללא CCTV, אין forensics לאחר אירוע — לא ניתן לזהות מי נכנס, מתי, מה עשה.","DCS-05.1":"ללא UPS וגיבוי חשמל, נפילת חשמל = דאון מיידי. מאיים על SLA בסיסי.","DCS-06.1":"DC במיקום גיאוגרפי בודד = רעידת אדמה, שיטפון, פיגוע אזורי = אובדן השירות. חוסר עמידה ב-DR.","DSP-01.1":"ללא מדיניות פרטיות, הספק לא מציג ללקוחות איך הוא מטפל בנתונים — חשיפה משפטית מיידית (GDPR Art. 13).","DSP-02.1":"ללא סיווג רגישות, כל הנתונים מטופלים אותו דבר — נתוני אשראי או רפואה ב-DB ציבורי. חוסר תאימות.","DSP-03.1":"אי-יכולת למחוק נתונים בבקשה = הפרת GDPR Art. 17 (Right to Erasure) ו-CCPA. קנסות עד 4% מההכנסות.","DSP-04.1":"ללא Multi-Tenancy Isolation = לקוח אחד יכול לראות נתוני לקוח אחר (data leakage cross-tenant).","DSP-05.1":"ללא Retention Policy, נתונים נשמרים לנצח — חשיפה מצטברת, הפרת data minimization, יותר מטרה לתוקפים.","DSP-06.1":"עובדי הספק עם גישה רחבה לנתוני לקוחות = insider threat, חיפוש לא מורשה, דליפות מכוונות.","DSP-07.1":"אי-עמידה ב-GDPR לעיבוד נתוני אזרחי EU = חשיפה משפטית של הלקוח, קנסות, איסור עיבוד.","DSP-07.2":"אי-עמידה ב-CCPA לאזרחי קליפורניה = תביעות, קנסות $7,500 להפרה.","DSP-08.1":"ללא DPA חתום, אין מסגרת חוזית לעיבוד נתונים — חשיפה ישירה של הלקוח ל-GDPR Art. 28.","DSP-09.1":"אי-יכולת לייצא נתונים = vendor lock-in. הלקוח כבול לספק גם אם השירות מתדרדר.","DSP-10.1":"אי-יכולת לעיין ולתקן נתונים = הפרת זכויות נושא המידע (GDPR Art. 15-16).","DSP-17.1":"שיתוף נתונים עם צדדים שלישיים ללא אישור = הפרת אמון, חשיפה רגולטורית, אובדן שליטה על הנתונים.","GRC-01.1":"ללא CISO או תפקיד אבטחה בכיר = אבטחה ללא בעלים, ללא תקציב, ללא סמכות החלטה. סימן אזהרה ראשי.","GRC-02.1":"מדיניות שלא מאושרת בהנהלה = ללא תקציב, ללא סמכות אכיפה, ללא accountability ארגוני.","GRC-03.1":"ללא הערכות סיכון תקופתיות, הספק לא יודע במה הוא חשוף — אבטחה ריאקטיבית בלבד.","GRC-04.1":"ללא תהליך ציות, הספק יסתבך עם תקנות (GDPR, SOX, HIPAA) ויחשוף את הלקוח לסיכון משותף.","GRC-05.1":"ללא ועדת אבטחה, החלטות מתקבלות ad-hoc — ללא ראייה צולבת ארגונית.","GRC-06.1":"מדיניות שלא מתעדכנת שנתית = מדיניות לא רלוונטית. איומים משתנים, רגולציה משתנה.","HRS-01.1":"ללא בדיקות רקע = העסקת אנשים עם רישום פלילי או היסטוריית פגיעה באמון — insider threat ראשון.","HRS-02.1":"ללא הדרכת אבטחה בקבלה, עובדים חדשים הם הסיכון הגבוה ביותר ל-phishing ולשגיאות.","HRS-03.1":"ללא הדרכות שנתיות, אנשים שוכחים. איומים מתפתחים. שיעור הצלחה של phishing עולה.","HRS-04.1":"ללא Offboarding מסודר = עובדים עוזבים עם גישה אקטיבית, מכשירים, נתונים. סיכון insider מתועד היטב.","HRS-05.1":"השארת הרשאות לאחר עזיבה = חשבונות לא מנוטרים שתוקפים מחפשים. דקות ראשונות לאחר עזיבה הן הקריטיות.","HRS-06.1":"ללא NDA, אין הגנה משפטית מפני דליפת מידע על-ידי עובדים — הסיכוי לתביעה הצלחה אפסי.","IAM-01.1":"ללא מדיניות IAM, ניהול גישה אד-הוק = privilege creep, חשבונות יתומים, חוסר עקביות בהרשאות.","IAM-02.1":"ללא MFA על חשבונות מנהלתיים = compromise בודד נותן שליטה מלאה. תקיפת ה-credentials הקלאסית.","IAM-02.2":"MFA חלקי = נקודות חולשה. תוקפים ימצאו את החשבונות ללא MFA וייכנסו דרכם.","IAM-03.1":"ללא Least Privilege, lateral movement קל — compromise של חשבון נמוך = גישה לכל המערכת.","IAM-04.1":"ללא Access Review, privilege accumulation — עובדים אוספים הרשאות לאורך זמן ולא מאבדים אותן.","IAM-05.1":"ללא SSO, שימוש בסיסמאות מרובות = סיסמאות חלשות, שימוש חוזר, קושי באכיפת מדיניות.","IAM-06.1":"חשבונות ישנים פעילים = חשבונות יתומים, היעד הראשון לתוקפים. Zombie accounts מקור עיקרי לפריצות.","IAM-07.1":"ללא ניטור גישה חריגה, פריצה מתבצעת בלי שאיש שם לב — Mean Time to Detect גבוה משמעותית.","IAM-08.1":"ללא PAM, חשבונות מנהלתיים ללא ניטור, ללא session recording, ללא just-in-time access. סיכון insider קיצוני.","IAM-09.1":"סיסמאות חלשות (פחות מ-12 תווים) = שבירה ב-brute force בשעות. סטנדרט NIST 800-63B.","IAM-10.1":"גישה מרחוק ללא VPN = חשיפה ישירה של פורטים ניהוליים לאינטרנט. RDP/SSH פתוחים = פריצה תוך ימים.","IAM-13.1":"ללא RBAC, ניהול הרשאות אד-הוק = חוסר עקביות, קושי לבדיקה, privilege creep מהיר.","IPY-01.1":"ללא תיעוד API, הלקוח לא יכול לבנות אינטגרציות או לייצא נתונים — vendor lock-in.","IPY-02.1":"ייצוא בפורמט קנייני בלבד = הלקוח לא יכול לעבור לספק אחר. תלות מובנית.","IPY-03.1":"ללא תהליך Migration, יציאה מהשירות = פרויקט מורכב ויקר. חוסר גמישות עסקית.","IPY-04.1":"ללא תמיכה בסטנדרטים פתוחים, אינטגרציות יקרות וקנייניות. עלות החזקה גבוהה.","IVS-01.1":"ללא segmentation, רשת שטוחה = lateral movement חופשי לאחר פריצה. אחת הסיבות העיקריות לפריצות גדולות.","IVS-02.1":"ללא Firewall ו-IDS/IPS, אין הגנת היקף או זיהוי תקיפה = exposure ישיר וחוסר התרעה.","IVS-03.1":"VMs לא מבודדות בין לקוחות = side-channel attacks (Spectre, Meltdown) או VM escape = cross-tenant data access.","IVS-04.1":"ללא IaC, configuration drift, קושי באודיט, אי-עקביות בין סביבות. שינויים ידניים = פגיעויות לא מתועדות.","IVS-06.1":"פורטים פתוחים מיותרים = שטח תקיפה מורחב. כל פורט שלא נחוץ הוא וקטור פוטנציאלי.","IVS-07.1":"ללא WAF, התקפות אפליקטיביות (SQLi, XSS, command injection) מגיעות ישירות לאפליקציה.","IVS-09.1":"ללא Pen Test לתשתית, פגיעויות ברמת רשת/OS לא נחשפות עד שתוקף אמיתי מוצא אותן.","LOG-01.1":"ללא מדיניות לוגים, מה נרשם זה החלטה אד-הוק של מפתחים = חורים, חוסר עקביות, אי-עמידה רגולטורית.","LOG-02.1":"לוגים לתקופה קצרה = אי-יכולת לחקור אירועים שמתגלים מאוחר. Mean Time to Discovery של פריצות הוא 200+ ימים.","LOG-03.1":"ללא SIEM, לוגים מפוזרים = אין קורלציה, אין התרעות, אירועים נופלים בין הכיסאות.","LOG-04.1":"ללא לוגי גישה = אי-יכולת לזהות מי ניגש למה ומתי. אין forensics, אין accountability.","LOG-05.1":"ללא התרעות, אירוע מתגלה רק כשמישהו פותח את הלוגים ידנית. Time-to-detect של ימים-שבועות.","LOG-06.1":"לוגים ניתנים לשינוי = תוקף יכול למחוק עקבותיו. אין audit trail אמין.","LOG-09.1":"אי-יכולת לגשת ללוגים בבקשת לקוח = לא ניתן לחקור אירוע מצד הלקוח, חוסר תאימות לחובות תיעוד.","SEF-01.1":"ללא תהליך IR, אירוע מתפזר = החלטות אד-הוק, escalation לא ברור, עיכובים, נזק מתרחב.","SEF-02.1":"ללא CSIRT, אין צוות מוגדר לטיפול באירועים = תגובה איטית, חסר ידע ספציפי, חוסר אחריות.","SEF-03.1":"אי-הודעה תוך 72 שעות = הפרת GDPR Art. 33, חשיפת הלקוח לקנסות, פגיעה באמון.","SEF-04.1":"ללא תרגילי Tabletop, התגובה לאירוע אמיתי תהיה הפעם הראשונה שהצוות מתאמן — תוצאה רעה צפויה.","SEF-05.1":"ללא ערוץ דיווח על פרצות, חוקרי אבטחה לא יכולים לדווח אחראית = פרצות מתפרסמות פומבית או נמכרות בשוק שחור.","SEF-06.1":"ללא Bug Bounty, הספק מסתמך רק על מבדקים פנימיים — מאבד את היתרון של אלפי עיניים חיצוניות.","SEF-07.1":"ללא Responsible Disclosure, חוקרים לא יודעים איך לדווח = פגיעויות מתפרסמות במקום להיסתום.","SEF-08.1":"ללא Post-Mortem, אותן הטעויות חוזרות. אין למידה ארגונית מאירועים.","STA-01.1":"ללא הערכת ספקי משנה = הספק שלך הוא חלש כמו החוליה החלשה בשרשרת שלו. SolarWinds, Kaseya — דוגמאות עדכניות.","STA-02.1":"ספקי ענן לא ידועים = הלקוח לא יודע איפה הנתונים שלו, חוסר עמידה ב-data residency.","STA-03.1":"ללא DPA עם ספקי משנה = שרשרת ה-DPA נשברת, חשיפה ישירה ל-GDPR.","STA-04.1":"אי-הודעה על שינוי ספק ענן = הלקוח גילה רק לאחר העברה. בעיות data residency, ציות, ריבונות נתונים.","STA-05.1":"ספקי משנה לא מוערכים אבטחתית = פתח כניסה דרך הצד החלש. Target's HVAC vendor — קלאסי.","STA-09.1":"ללא רשימת sub-processors = הלקוח לא יודע מי נוגע בנתוניו. הפרה של GDPR Art. 28.","TVM-01.1":"ללא סריקת פגיעויות = פגיעויות ידועות (CVEs) נשארות פתוחות. מקור #1 לפריצות (לא 0-days).","TVM-02.1":"פגיעויות קריטיות לא מתוקנות תוך 30 יום = חלון זמן ארוך מדי לתקיפה. Exploits ציבוריים מתפרסמים תוך ימים.","TVM-03.1":"ללא Pen Test חיצוני שנתי = פגיעויות מורכבות (chained, business logic) לא מתגלות עד תקיפה אמיתית.","TVM-04.1":"ללא Patch Management, עדכונים אד-הוק = מערכות עם פגיעויות ידועות פתוחות חודשים. וקטור פריצה ראשי.","TVM-05.1":"ללא Threat Intelligence, התקפות חדשות תופסות לא מוכנים — חוסר התרעה מוקדמת.","TVM-06.1":"ללא ניהול פגיעויות בקוד צד שלישי = ספריות פגיעות בייצור (Log4Shell, Heartbleed). 80% מהקוד הוא תלויות.","TVM-09.1":"אי-שיתוף תוצאות Pen Test = הלקוח לא יכול לבדוק את עצמאות והקפדת ההערכה.","UEM-01.1":"ללא MDM, מכשירי עובדים לא מנוהלים = ניידים אבודים, מכשירים פגיעים, חוסר אכיפת מדיניות.","UEM-02.1":"מכשירים ניידים לא מוצפנים = מכשיר אבוד = דליפת נתונים. תרחיש שכיח (גניבה, אובדן).","UEM-03.1":"ללא Remote Wipe, מכשיר אבוד = הימור שהמוצא ימחק. חשיפת נתוני לקוחות וקרדנציאלים.","UEM-06.1":"ללא Endpoint Protection (EDR/AV) = malware על endpoint = compromise של חשבונות, lateral movement, ransomware.","AAC-01.1":"ללא SOC 2 Type II = אין אימות חיצוני של בקרות אבטחה לאורך זמן. סטנדרט מינימלי לספק SaaS.","AAC-01.2":"ללא ISO 27001 = אין אימות של ISMS (Information Security Management System) לפי תקן בינלאומי.","AAC-02.1":"ללא ביקורת פנימית שנתית = הספק לא בודק את עצמו. גילוי בעיות רק כשהן הופכות לאירועים.","AAC-03.1":"ללא ביקורת חיצונית = הסתמכות על דיווח עצמי בלבד. חוסר אובייקטיביות.","AAC-04.1":"אי-זמינות תוצאות ביקורת ללקוחות = הלקוח לא יכול לבדוק את הציות שלו עצמו = חשיפה רגולטורית.","AAC-05.1":"ללא תהליך טיפול בממצאי ביקורת = ממצאים נשארים פתוחים, חוזרים שנה אחר שנה.","AAC-06.1":"אי-פרסום ב-CSA STAR = חוסר שקיפות לגבי בקרות ענן. STAR הוא הסטנדרט בתעשייה."};
+const BLOCKER_PENALTY = 3;
+
+let state = { vendors: {}, currentId: null };
+let modalMode = 'new';
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem('caiq_state_v3');
+    if (raw) {
+      state = JSON.parse(raw);
+      if (!state.vendors) state.vendors = {};
+      return;
+    }
+  } catch(e) { console.error(e); }
+
+  // Migrate from older versions
+  for (const oldKey of ['caiq_state_v2', 'caiq_state_v1']) {
+    try {
+      const oldRaw = localStorage.getItem(oldKey);
+      if (oldRaw) {
+        const old = JSON.parse(oldRaw);
+        if (old.vendors && Object.keys(old.vendors).length > 0) {
+          // Filter out empty placeholder vendors
+          const filtered = {};
+          Object.values(old.vendors).forEach(v => {
+            if (v.name && v.name !== 'ספק לדוגמה') {
+              filtered[v.id] = v;
+            }
+          });
+          if (Object.keys(filtered).length > 0) {
+            state = { ...old, vendors: filtered };
+            return;
+          }
+        }
+      }
+    } catch(e) {}
+  }
+  state = { vendors: {}, currentId: null };
+}
+
+function saveState() { localStorage.setItem('caiq_state_v3', JSON.stringify(state)); }
+
+function genId() { return 'v_' + Date.now() + '_' + Math.random().toString(36).slice(2,7); }
+
+function createVendor(meta) {
+  const id = genId();
+  state.vendors[id] = {
+    id,
+    name: meta.name,
+    assessor: meta.assessor || '',
+    date: meta.date || new Date().toISOString().slice(0,10),
+    contact: meta.contact || '',
+    url: meta.url || '',
+    engagementNotes: meta.notes || '',
+    createdAt: new Date().toISOString(),
+    answers: {},
+    notes: {}
+  };
+  return id;
+}
+
+function currentVendor() { return state.currentId ? state.vendors[state.currentId] : null; }
+
+function getDomainCode(qid) { return qid.split('-')[0]; }
+
+function computeScores() {
+  const v = currentVendor();
+  if (!v) return null;
+  const ans = v.answers || {};
+  const byDomain = {};
+  DOMAINS.forEach(d => {
+    byDomain[d.code] = { ...d, yes: 0, no: 0, na: 0, total: 0, blockerFails: 0, score: 0 };
+  });
+  let yes=0, no=0, na=0, blockFails=0;
+  const failedBlockers = [];
+  QUESTIONS.forEach(q => {
+    const code = getDomainCode(q.id);
+    if (!byDomain[code]) return;
+    const a = ans[q.id];
+    byDomain[code].total++;
+    if (a === 'yes') { byDomain[code].yes++; yes++; }
+    else if (a === 'no') {
+      byDomain[code].no++; no++;
+      if (q.blocker) { byDomain[code].blockerFails++; blockFails++; failedBlockers.push(q); }
+    }
+    else if (a === 'na') { byDomain[code].na++; na++; }
+  });
+  let weighted = 0;
+  let weightSumApplicable = 0;
+  Object.values(byDomain).forEach(d => {
+    const denom = d.yes + d.no;
+    d.score = denom > 0 ? (d.yes / denom) * 100 : null;
+    if (d.score !== null) {
+      weighted += d.score * d.weight_normalized;
+      weightSumApplicable += d.weight_normalized;
+    }
+  });
+  const rawScore = weightSumApplicable > 0 ? weighted / weightSumApplicable : null;
+  const penalty = blockFails * BLOCKER_PENALTY;
+  const finalScore = rawScore === null ? null : Math.max(0, rawScore - penalty);
+  return { byDomain, yes, no, na, blockFails, failedBlockers, rawScore, penalty, finalScore };
+}
+
+function tierOf(score) {
+  if (score === null || isNaN(score)) return { key:'none', label:'לא הוזנו תשובות', color:'var(--ink-faint)' };
+  if (score >= 85) return { key:'low', label:'סיכון נמוך · אישור מלא', color:'var(--green)' };
+  if (score >= 70) return { key:'mid', label:'סיכון בינוני · אישור עם מעקב', color:'var(--yellow)' };
+  if (score >= 50) return { key:'high', label:'סיכון גבוה · דרוש שיפור', color:'var(--orange)' };
+  return { key:'crit', label:'סיכון קריטי · לא מאושר', color:'var(--red)' };
+}
+
+function render() {
+  const v = currentVendor();
+  if (!v) {
+    renderEmpty();
+    return;
+  }
+  renderVendorSelect();
+  renderMobileVendorName();
+  renderTopbar();
+  renderDashboard();
+  renderQuestionnaire();
+  renderCompare();
+  renderLiveScore();
+}
+
+function renderEmpty() {
+  document.getElementById('dashboardContent').innerHTML = `
+    <div class="empty-state">
+      <h3>אין ספק נבחר</h3>
+      <p>הוסיפו ספק כדי להתחיל הערכה</p>
+      <button class="btn btn-primary" onclick="openNewVendorModal()">+ הוספת ספק חדש</button>
+    </div>
+  `;
+  document.getElementById('mobileVendorName').textContent = 'אין ספק';
+  document.getElementById('liveScoreValue').textContent = '—';
+  document.getElementById('liveScoreTier').textContent = 'אין ספק';
+  document.getElementById('vendorSelect').innerHTML = '<option>אין ספק</option>';
+}
+
+function renderMobileVendorName() {
+  const v = currentVendor();
+  document.getElementById('mobileVendorName').textContent = v ? v.name : 'אין ספק';
+}
+
+function renderVendorSelect() {
+  const sel = document.getElementById('vendorSelect');
+  const vendors = Object.values(state.vendors).sort((a,b) => a.createdAt.localeCompare(b.createdAt));
+  sel.innerHTML = vendors.map(v => `<option value="${v.id}" ${v.id === state.currentId ? 'selected' : ''}>${escapeHtml(v.name)}</option>`).join('');
+}
+
+function renderTopbar() {
+  const v = currentVendor();
+  if (!v) return;
+  const view = document.querySelector('.nav-item.active').dataset.view;
+  const titles = { dashboard: 'לוח מחוונים', questionnaire: 'שאלון CAIQ', compare: 'השוואת ספקים' };
+  document.getElementById('topbarTitle').textContent = titles[view];
+  document.getElementById('topbarSub').textContent = `${v.name} · CAIQ v4`;
+}
+
+function renderLiveScore() {
+  const s = computeScores();
+  if (!s) return;
+  const t = tierOf(s.finalScore);
+  document.getElementById('liveScoreValue').textContent = s.finalScore === null ? '—' : s.finalScore.toFixed(1) + '%';
+  const tierEl = document.getElementById('liveScoreTier');
+  tierEl.textContent = t.label;
+  tierEl.className = 'live-score-tier tier-' + t.key;
+  const detail = document.getElementById('liveScoreDetail');
+  if (s.rawScore !== null && s.penalty > 0) {
+    detail.textContent = `${s.rawScore.toFixed(1)}% − ${s.penalty} (${s.blockFails} חסמות)`;
+  } else {
+    detail.textContent = '';
+  }
+}
+
+function renderDashboard() {
+  const v = currentVendor();
+  const s = computeScores();
+  const t = tierOf(s.finalScore);
+  const total = QUESTIONS.length;
+  const answered = s.yes + s.no + s.na;
+
+  // Build metadata
+  const metaParts = [];
+  if (v.assessor) metaParts.push({ label: 'מעריך', value: escapeHtml(v.assessor) });
+  if (v.date) metaParts.push({ label: 'תאריך הערכה', value: new Date(v.date).toLocaleDateString('he-IL') });
+  if (v.contact) metaParts.push({ label: 'איש קשר', value: escapeHtml(v.contact) });
+  if (v.url) metaParts.push({ label: 'אתר', value: `<a class="meta-value" href="${escapeAttr(v.url)}" target="_blank" rel="noopener">${escapeHtml(v.url.replace(/^https?:\/\//, ''))}</a>` });
+  metaParts.push({ label: 'התקדמות', value: `${answered} / ${total}` });
+  metaParts.push({ label: 'סטטוס', value: `<span style="color:${t.color}">● ${t.label.split('·')[0].trim()}</span>` });
+  if (v.engagementNotes) metaParts.push({ label: 'הערות', value: escapeHtml(v.engagementNotes), full: true });
+
+  // Score ring
+  const score = s.finalScore;
+  const pct = score === null ? 0 : score;
+  const radius = 78;
+  const circ = 2 * Math.PI * radius;
+  const offset = circ - (pct / 100) * circ;
+
+  // Score formula
+  let formulaHtml;
+  if (s.rawScore === null) {
+    formulaHtml = '<div style="color:var(--ink-faint);font-size:13px;text-align:center;width:100%">השלימו תשובות כדי לראות את חישוב הציון</div>';
+  } else {
+    formulaHtml = `
+      <div class="step">
+        <div class="step-label">גולמי</div>
+        <div class="step-value">${s.rawScore.toFixed(1)}%</div>
+      </div>
+      <div class="op">−</div>
+      <div class="step">
+        <div class="step-label">קנס חסמות</div>
+        <div class="step-value" style="color:${s.penalty > 0 ? 'var(--red)' : 'var(--ink)'}">${s.penalty}</div>
+      </div>
+      <div class="op">=</div>
+      <div class="step">
+        <div class="step-label">סופי</div>
+        <div class="step-value" style="color:${t.color}">${s.finalScore.toFixed(1)}%</div>
+      </div>
+    `;
+  }
+
+  // Domain bars
+  const domainBarsHtml = Object.values(s.byDomain).map(d => {
+    const score = d.score;
+    const tier = tierOf(score);
+    const w = score === null ? 0 : score;
+    return `
+      <div class="domain-bar-row">
+        <div class="domain-bar-label">
+          ${escapeHtml(d.name)}
+          <span class="domain-bar-code">${d.code} · ${d.weight_normalized}%</span>
+        </div>
+        <div class="domain-bar-track">
+          <div class="domain-bar-fill" style="width:${w}%; background:${tier.color}"></div>
+        </div>
+        <div class="domain-bar-num" style="color:${tier.color}">${score === null ? '—' : score.toFixed(0) + '%'}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Blockers panel
+  let blockersPanelHtml = '';
+  if (s.failedBlockers.length > 0) {
+    blockersPanelHtml = `
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">בקרות חסמות שנכשלו</div>
+            <div class="panel-sub">${s.failedBlockers.length} violations · −${s.penalty} pts</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="blocker-list">
+            ${s.failedBlockers.map(q => `
+              <div class="blocker-item">
+                <span class="blocker-id">${q.id}</span>
+                <div>
+                  ${escapeHtml(q.question)}
+                  <div style="font-size:11px;color:var(--ink-faint);margin-top:2px;font-family:'JetBrains Mono',monospace">${escapeHtml(q.domain)}</div>
+                  ${RISKS[q.id] ? `<div style="font-size:12px;color:var(--ink-soft);margin-top:6px;line-height:1.5">${escapeHtml(RISKS[q.id])}</div>` : ''}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  document.getElementById('dashboardContent').innerHTML = `
+    <div class="dash-hero">
+      <div class="dash-hero-info">
+        <h2>הערכה נוכחית</h2>
+        <div class="dash-hero-vendor">${escapeHtml(v.name)}</div>
+        <div class="dash-hero-meta">
+          ${metaParts.map(m => `
+            <div class="meta-item" ${m.full ? 'style="grid-column:1/-1"' : ''}>
+              <div class="meta-label">${m.label}</div>
+              <div class="meta-value">${m.value}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div class="score-ring">
+        <svg width="180" height="180" viewBox="0 0 180 180">
+          <circle cx="90" cy="90" r="${radius}" fill="none" stroke="var(--line-soft)" stroke-width="12"/>
+          <circle cx="90" cy="90" r="${radius}" fill="none" stroke="${t.color}" stroke-width="12"
+                  stroke-dasharray="${circ}" stroke-dashoffset="${offset}" stroke-linecap="round"
+                  style="transition: stroke-dashoffset 0.5s ease;"/>
+        </svg>
+        <div class="score-ring-text">
+          <div class="score-ring-num" style="color:${t.color}">${score === null ? '—' : score.toFixed(0)}</div>
+          <div class="score-ring-pct">${score === null ? '' : 'מתוך 100'}</div>
+          <div class="score-ring-tier" style="color:${t.color}">${t.key === 'none' ? '' : t.label.split('·')[0].trim()}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="score-formula">${formulaHtml}</div>
+
+    <div class="kpi-grid">
+      <div class="kpi green">
+        <div class="kpi-label">תשובות "כן"</div>
+        <div class="kpi-value">${s.yes}</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" style="width:${(s.yes/total)*100}%"></div></div>
+      </div>
+      <div class="kpi red">
+        <div class="kpi-label">תשובות "לא"</div>
+        <div class="kpi-value">${s.no}</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" style="width:${(s.no/total)*100}%"></div></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">לא רלוונטי</div>
+        <div class="kpi-value">${s.na}</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" style="width:${(s.na/total)*100}%"></div></div>
+      </div>
+      <div class="kpi yellow">
+        <div class="kpi-label">חסמות שנכשלו</div>
+        <div class="kpi-value">${s.blockFails}</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" style="width:${(s.blockFails/43)*100}%"></div></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">פירוט לפי דומיין</div>
+          <div class="panel-sub">17 domains · 100%</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="domain-bars">${domainBarsHtml}</div>
+      </div>
+    </div>
+
+    ${blockersPanelHtml}
+  `;
+}
+
+function renderQuestionnaire() {
+  const v = currentVendor();
+  if (!v) return;
+  const s = computeScores();
+  const total = QUESTIONS.length;
+  const answered = s.yes + s.no + s.na;
+  document.getElementById('qnaProgress').textContent = `${answered} / ${total}`;
+
+  const search = (document.getElementById('searchBox').value || '').toLowerCase().trim();
+  const container = document.getElementById('questionnaire');
+  const grouped = {};
+  DOMAINS.forEach(d => grouped[d.code] = []);
+  QUESTIONS.forEach(q => {
+    const code = getDomainCode(q.id);
+    if (grouped[code]) grouped[code].push(q);
+  });
+
+  const openSet = window._openDomains || new Set();
+  window._openDomains = openSet;
+  const openDetails = window._openDetails || new Set();
+  window._openDetails = openDetails;
+
+  container.innerHTML = DOMAINS.map(d => {
+    const qs = grouped[d.code] || [];
+    const filteredQs = search ? qs.filter(q =>
+      q.id.toLowerCase().includes(search) ||
+      q.question.toLowerCase().includes(search) ||
+      q.domain.toLowerCase().includes(search) ||
+      (RISKS[q.id] || '').toLowerCase().includes(search)
+    ) : qs;
+    if (search && filteredQs.length === 0) return '';
+
+    const ds = s.byDomain[d.code];
+    const tier = tierOf(ds.score);
+    const isOpen = openSet.has(d.code) || !!search;
+
+    return `
+      <div class="domain-card ${isOpen ? 'open' : ''}" data-code="${d.code}">
+        <div class="domain-head" onclick="toggleDomain('${d.code}')">
+          <span class="chevron">▸</span>
+          <div>
+            <span class="domain-name">${escapeHtml(d.name)}</span>
+            <span class="domain-code-tag">${d.code} · ${d.weight_normalized}%</span>
+          </div>
+          <div class="domain-stats">
+            <span class="stat"><span class="dot green"></span>${ds.yes}</span>
+            <span class="stat"><span class="dot red"></span>${ds.no}</span>
+            <span class="stat"><span class="dot gray"></span>${ds.na}</span>
+            <span class="stat" style="color:var(--ink-faint)">/${ds.total}</span>
+          </div>
+          <div class="domain-mini-bar">
+            <div class="domain-mini-fill" style="width:${ds.score===null?0:ds.score}%;background:${tier.color}"></div>
+          </div>
+        </div>
+        <div class="questions">
+          ${filteredQs.map(q => renderQuestion(q, v)).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderQuestion(q, v) {
+  const ans = v.answers[q.id];
+  const note = v.notes[q.id] || '';
+  const isViolation = q.blocker && ans === 'no';
+  const detailOpen = window._openDetails && window._openDetails.has(q.id);
+  const risk = RISKS[q.id] || '';
+  return `
+    <div class="question ${q.blocker ? 'has-blocker' : ''} ${isViolation ? 'violation' : ''}">
+      <div class="q-id">
+        ${q.id}
+        ${q.blocker ? '<div class="q-blocker-tag">חסמת</div>' : ''}
+      </div>
+      <div class="q-main">
+        <div class="q-text">${escapeHtml(q.question)}</div>
+        <div class="q-actions">
+          ${risk ? `<button class="q-link" onclick="toggleDetail('${q.id}')">${detailOpen ? '▾ הסתר סיכון' : '▸ הצג סיכון אם "לא"'}</button>` : ''}
+          ${ans ? `<span style="color:var(--ink-faint)">·</span>` : ''}
+          ${ans === 'yes' ? '<span style="color:var(--green)">✓ כן</span>' : ans === 'no' ? '<span style="color:var(--red)">✗ לא</span>' : ans === 'na' ? '<span>○ לא רלוונטי</span>' : ''}
+        </div>
+        <div class="q-detail ${detailOpen ? 'open' : ''}">
+          <div class="q-detail-label">⚠ סיכון אם התשובה "לא"</div>
+          ${escapeHtml(risk)}
+        </div>
+        <textarea class="q-notes" placeholder="הערות (לא חובה)" onchange="setNote('${q.id}', this.value)" rows="1">${escapeHtml(note)}</textarea>
+      </div>
+      <div class="answer-group">
+        <button class="answer-btn yes ${ans==='yes'?'active':''}" onclick="setAnswer('${q.id}','yes')">כן</button>
+        <button class="answer-btn no  ${ans==='no'?'active':''}"  onclick="setAnswer('${q.id}','no')">לא</button>
+        <button class="answer-btn na  ${ans==='na'?'active':''}"  onclick="setAnswer('${q.id}','na')">N/A</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderCompare() {
+  const vendors = Object.values(state.vendors);
+  const body = document.getElementById('compareBody');
+  if (vendors.length === 0) {
+    body.innerHTML = `<div class="empty"><h3>אין ספקים להשוות</h3><p>הוסיפו לפחות 2 ספקים כדי להציג השוואה</p></div>`;
+    return;
+  }
+  const rows = vendors.map(v => {
+    const oldId = state.currentId;
+    state.currentId = v.id;
+    const s = computeScores();
+    state.currentId = oldId;
+    return { v, s, t: tierOf(s.finalScore) };
+  }).sort((a,b) => (b.s.finalScore || 0) - (a.s.finalScore || 0));
+
+  let html = `<div class="compare-table"><table>
+    <thead><tr>
+      <th>ספק</th><th>סופי</th><th>גולמי</th><th>קנס</th><th>דירוג</th><th>כן</th><th>לא</th><th>חסמות</th>
+    </tr></thead><tbody>`;
+  rows.forEach(({v, s, t}) => {
+    const score = s.finalScore;
+    html += `<tr>
+      <td class="compare-vendor-name">${escapeHtml(v.name)}</td>
+      <td class="num" style="color:${t.color}">${score===null ? '—' : score.toFixed(1) + '%'}</td>
+      <td class="num" style="color:var(--ink-faint)">${s.rawScore===null ? '—' : s.rawScore.toFixed(1) + '%'}</td>
+      <td class="num" style="color:${s.penalty > 0 ? 'var(--red)' : 'var(--ink-faint)'}">${s.penalty > 0 ? '−' + s.penalty : '0'}</td>
+      <td><span class="tier-pill ${t.key}">${t.label.split('·')[0].trim()}</span></td>
+      <td class="num" style="color:var(--green)">${s.yes}</td>
+      <td class="num" style="color:var(--red)">${s.no}</td>
+      <td class="num" style="color:${s.blockFails > 0 ? 'var(--red)' : 'var(--ink-faint)'}">${s.blockFails}</td>
+    </tr>`;
+  });
+  html += `</tbody></table></div>`;
+
+  if (vendors.length > 1) {
+    html += `<div class="compare-table" style="margin-top:14px"><table>
+      <thead><tr>
+        <th>דומיין</th>${rows.map(r => `<th>${escapeHtml(r.v.name)}</th>`).join('')}
+      </tr></thead><tbody>`;
+    DOMAINS.forEach(d => {
+      html += `<tr><td>${escapeHtml(d.name)} <span style="color:var(--ink-faint);font-family:'JetBrains Mono',monospace;font-size:11px">${d.code}</span></td>`;
+      rows.forEach(r => {
+        const ds = r.s.byDomain[d.code];
+        const tier = tierOf(ds.score);
+        html += `<td class="num" style="color:${tier.color}">${ds.score===null ? '—' : ds.score.toFixed(0) + '%'}</td>`;
+      });
+      html += `</tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+
+  body.innerHTML = html;
+}
+
+// Sheet actions
+function renderVendorSheet() {
+  const list = document.getElementById('sheetVendorList');
+  const vendors = Object.values(state.vendors).sort((a,b) => a.createdAt.localeCompare(b.createdAt));
+  if (vendors.length === 0) {
+    list.innerHTML = '<div style="text-align:center;color:var(--ink-faint);padding:20px">אין ספקים. הוסיפו ספק חדש למטה.</div>';
+    return;
+  }
+  list.innerHTML = vendors.map(v => {
+    const oldId = state.currentId;
+    state.currentId = v.id;
+    const s = computeScores();
+    state.currentId = oldId;
+    const t = tierOf(s.finalScore);
+    return `
+      <button class="sheet-vendor-item ${v.id === state.currentId ? 'active' : ''}" onclick="selectVendor('${v.id}')">
+        <span>${escapeHtml(v.name)}</span>
+        <span class="sheet-vendor-score" style="color:${t.color}">${s.finalScore === null ? '—' : s.finalScore.toFixed(0) + '%'}</span>
+      </button>
+    `;
+  }).join('');
+}
+
+function openVendorSheet() {
+  renderVendorSheet();
+  document.getElementById('vendorSheetOverlay').classList.add('active');
+  document.getElementById('vendorSheet').classList.add('active');
+}
+function openExportSheet() {
+  if (!currentVendor()) {
+    toast('הוסיפו ספק לפני ייצוא');
+    return;
+  }
+  document.getElementById('vendorSheetOverlay').classList.add('active');
+  document.getElementById('exportSheet').classList.add('active');
+}
+function closeSheets() {
+  document.getElementById('vendorSheetOverlay').classList.remove('active');
+  document.getElementById('vendorSheet').classList.remove('active');
+  document.getElementById('exportSheet').classList.remove('active');
+}
+function selectVendor(id) {
+  state.currentId = id;
+  saveState();
+  closeSheets();
+  render();
+}
+
+// Actions
+function setAnswer(qid, val) {
+  const v = currentVendor();
+  if (!v) return;
+  if (v.answers[qid] === val) delete v.answers[qid];
+  else v.answers[qid] = val;
+  saveState();
+  render();
+}
+function setNote(qid, val) {
+  const v = currentVendor();
+  if (!v) return;
+  if (val) v.notes[qid] = val; else delete v.notes[qid];
+  saveState();
+}
+function toggleDomain(code) {
+  if (!window._openDomains) window._openDomains = new Set();
+  const set = window._openDomains;
+  const card = document.querySelector(`.domain-card[data-code="${code}"]`);
+  if (set.has(code)) { set.delete(code); card.classList.remove('open'); }
+  else { set.add(code); card.classList.add('open'); }
+}
+function toggleDetail(qid) {
+  if (!window._openDetails) window._openDetails = new Set();
+  const set = window._openDetails;
+  if (set.has(qid)) set.delete(qid); else set.add(qid);
+  renderQuestionnaire();
+}
+function expandAll(open) {
+  if (!window._openDomains) window._openDomains = new Set();
+  if (open) DOMAINS.forEach(d => window._openDomains.add(d.code));
+  else window._openDomains.clear();
+  renderQuestionnaire();
+}
+
+// Modal
+function openOnboardingModal() {
+  modalMode = 'onboard';
+  document.getElementById('modalTitle').textContent = 'ברוכים הבאים';
+  document.getElementById('modalSub').innerHTML = 'מלאו את פרטי הספק להערכה. שדות עם <span style="color:var(--red)">*</span> חובה. ניתן לערוך מאוחר יותר.';
+  document.getElementById('modalCancelBtn').style.display = 'none';
+  resetModalFields();
+  document.getElementById('vendorModal').classList.add('active');
+  setTimeout(() => document.getElementById('f_name').focus(), 50);
+}
+function openNewVendorModal() {
+  modalMode = 'new';
+  document.getElementById('modalTitle').textContent = 'הוספת ספק חדש';
+  document.getElementById('modalSub').innerHTML = 'מלאו את פרטי הספק. שדות עם <span style="color:var(--red)">*</span> חובה.';
+  document.getElementById('modalCancelBtn').style.display = '';
+  resetModalFields();
+  document.getElementById('vendorModal').classList.add('active');
+  setTimeout(() => document.getElementById('f_name').focus(), 50);
+}
+function editVendorModal() {
+  const v = currentVendor();
+  if (!v) { toast('אין ספק לעריכה'); return; }
+  modalMode = 'edit';
+  document.getElementById('modalTitle').textContent = 'עריכת פרטי ספק';
+  document.getElementById('modalSub').innerHTML = 'עדכנו את פרטי הספק. שינוי לא משפיע על תשובות שהוזנו.';
+  document.getElementById('modalCancelBtn').style.display = '';
+  document.getElementById('f_name').value = v.name || '';
+  document.getElementById('f_assessor').value = v.assessor || '';
+  document.getElementById('f_date').value = v.date || new Date().toISOString().slice(0,10);
+  document.getElementById('f_contact').value = v.contact || '';
+  document.getElementById('f_url').value = v.url || '';
+  document.getElementById('f_notes').value = v.engagementNotes || '';
+  document.getElementById('vendorModal').classList.add('active');
+  setTimeout(() => document.getElementById('f_name').select(), 50);
+}
+function resetModalFields() {
+  document.getElementById('f_name').value = '';
+  document.getElementById('f_assessor').value = '';
+  document.getElementById('f_date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('f_contact').value = '';
+  document.getElementById('f_url').value = '';
+  document.getElementById('f_notes').value = '';
+}
+function closeModal() {
+  if (modalMode === 'onboard') return;
+  document.getElementById('vendorModal').classList.remove('active');
+}
+function saveVendorModal() {
+  const name = document.getElementById('f_name').value.trim();
+  if (!name) {
+    document.getElementById('f_name').focus();
+    document.getElementById('f_name').style.borderColor = 'var(--red)';
+    setTimeout(() => document.getElementById('f_name').style.borderColor = '', 2000);
+    return;
+  }
+  const meta = {
+    name,
+    assessor: document.getElementById('f_assessor').value.trim(),
+    date: document.getElementById('f_date').value,
+    contact: document.getElementById('f_contact').value.trim(),
+    url: document.getElementById('f_url').value.trim(),
+    notes: document.getElementById('f_notes').value.trim()
+  };
+  if (modalMode === 'edit') {
+    const v = currentVendor();
+    Object.assign(v, {
+      name: meta.name,
+      assessor: meta.assessor,
+      date: meta.date,
+      contact: meta.contact,
+      url: meta.url,
+      engagementNotes: meta.notes
+    });
+    toast('פרטי הספק עודכנו');
+  } else {
+    const id = createVendor(meta);
+    state.currentId = id;
+    toast(modalMode === 'onboard' ? `נוצר: ${name}` : `נוסף: ${name}`);
+  }
+  saveState();
+  document.getElementById('vendorModal').classList.remove('active');
+  render();
+}
+function duplicateVendor() {
+  const orig = currentVendor();
+  if (!orig) { toast('אין ספק לשכפול'); return; }
+  const id = createVendor({
+    name: orig.name + ' (העתק)',
+    assessor: orig.assessor,
+    contact: orig.contact,
+    url: orig.url,
+    notes: orig.engagementNotes
+  });
+  state.vendors[id].answers = { ...orig.answers };
+  state.vendors[id].notes = { ...orig.notes };
+  state.currentId = id;
+  saveState();
+  render();
+  toast('הספק שוכפל');
+}
+function deleteVendor() {
+  const v = currentVendor();
+  if (!v) { toast('אין ספק למחיקה'); return; }
+  if (!confirm(`למחוק את "${v.name}"? פעולה זו אינה הפיכה.`)) return;
+  delete state.vendors[state.currentId];
+  if (Object.keys(state.vendors).length === 0) {
+    state.currentId = null;
+    saveState();
+    render();
+    openOnboardingModal();
+    return;
+  }
+  state.currentId = Object.keys(state.vendors)[0];
+  saveState();
+  render();
+  toast('הספק נמחק');
+}
+
+// Exports
+function exportJSON() {
+  const v = currentVendor();
+  if (!v) { toast('הוסיפו ספק לפני ייצוא'); return; }
+  const s = computeScores();
+  const data = {
+    vendor: {
+      name: v.name, assessor: v.assessor, assessmentDate: v.date,
+      contact: v.contact, url: v.url, engagementNotes: v.engagementNotes
+    },
+    exportedAt: new Date().toISOString(),
+    scoring: {
+      rawWeightedScore: s.rawScore, blockerPenalty: s.penalty,
+      finalScore: s.finalScore, tier: tierOf(s.finalScore).label,
+      penaltyPerBlocker: BLOCKER_PENALTY
+    },
+    summary: { yes: s.yes, no: s.no, na: s.na, blockerFails: s.blockFails },
+    domains: Object.values(s.byDomain).map(d => ({
+      code: d.code, name: d.name, weight: d.weight_normalized,
+      yes: d.yes, no: d.no, na: d.na, score: d.score, blockerFails: d.blockerFails
+    })),
+    failedBlockers: s.failedBlockers.map(q => ({
+      id: q.id, question: q.question, domain: q.domain, risk: RISKS[q.id] || ''
+    })),
+    answers: QUESTIONS.map(q => ({
+      id: q.id, question: q.question, domain: q.domain, blocker: q.blocker,
+      answer: v.answers[q.id] || null, note: v.notes[q.id] || '',
+      riskIfNo: RISKS[q.id] || ''
+    }))
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  download(blob, `CAIQ_${slug(v.name)}.json`);
+  toast('JSON יוצא');
+}
+
+function exportXLSX() {
+  const v = currentVendor();
+  if (!v) { toast('הוסיפו ספק לפני ייצוא'); return; }
+  const s = computeScores();
+  const wb = XLSX.utils.book_new();
+  const t = tierOf(s.finalScore);
+
+  const summaryData = [
+    ['דוח ציון CAIQ — סיכום מנהלים'],
+    ['Cloud Security Alliance · CCM v4'],
+    [],
+    ['פרטי הספק'],
+    ['שם הספק', v.name],
+    ['מעריך', v.assessor || '—'],
+    ['תאריך הערכה', v.date ? new Date(v.date).toLocaleDateString('he-IL') : '—'],
+    ['איש קשר', v.contact || '—'],
+    ['אתר הספק', v.url || '—'],
+    ['הערות התקשרות', v.engagementNotes || '—'],
+    [],
+    ['ציון'],
+    ['ציון משוקלל גולמי', s.rawScore === null ? '—' : s.rawScore.toFixed(2) + '%'],
+    [`קנס חסמות (${BLOCKER_PENALTY} נק׳ × ${s.blockFails})`, s.penalty === 0 ? '—' : '−' + s.penalty],
+    ['ציון סופי', s.finalScore === null ? '—' : s.finalScore.toFixed(2) + '%'],
+    ['דירוג סיכון', t.label],
+    [],
+    ['סיכום תשובות'],
+    ['כן', s.yes],
+    ['לא', s.no],
+    ['לא רלוונטי', s.na],
+    ['חסמות שנכשלו', s.blockFails]
+  ];
+  const ws1 = XLSX.utils.aoa_to_sheet(summaryData);
+  ws1['!cols'] = [{ wch: 32 }, { wch: 50 }];
+  ws1['!rtl'] = true;
+  XLSX.utils.book_append_sheet(wb, ws1, 'סיכום');
+
+  const qData = [['מזהה', 'שאלה', 'דומיין', 'חסמת', 'תשובה', 'הערות', 'סיכון אם "לא"']];
+  QUESTIONS.forEach(q => {
+    const a = v.answers[q.id];
+    const aLbl = a === 'yes' ? 'כן' : a === 'no' ? 'לא' : a === 'na' ? 'לא רלוונטי' : '';
+    qData.push([q.id, q.question, q.domain, q.blocker ? '✓' : '', aLbl, v.notes[q.id] || '', RISKS[q.id] || '']);
+  });
+  const ws2 = XLSX.utils.aoa_to_sheet(qData);
+  ws2['!cols'] = [{ wch: 12 }, { wch: 50 }, { wch: 28 }, { wch: 8 }, { wch: 14 }, { wch: 28 }, { wch: 70 }];
+  ws2['!rtl'] = true;
+  XLSX.utils.book_append_sheet(wb, ws2, 'שאלון');
+
+  const dData = [['קוד', 'דומיין', 'משקל %', 'כן', 'לא', 'לא רלוונטי', 'חסמות שנכשלו', 'ציון דומיין %', 'תרומה משוקללת']];
+  Object.values(s.byDomain).forEach(d => {
+    dData.push([
+      d.code, d.name, d.weight_normalized,
+      d.yes, d.no, d.na, d.blockerFails,
+      d.score === null ? '—' : d.score.toFixed(1),
+      d.score === null ? '—' : ((d.score * d.weight_normalized) / 100).toFixed(2)
+    ]);
+  });
+  const ws3 = XLSX.utils.aoa_to_sheet(dData);
+  ws3['!cols'] = [{ wch: 8 }, { wch: 30 }, { wch: 10 }, { wch: 6 }, { wch: 6 }, { wch: 14 }, { wch: 16 }, { wch: 14 }, { wch: 16 }];
+  ws3['!rtl'] = true;
+  XLSX.utils.book_append_sheet(wb, ws3, 'ציון לפי דומיין');
+
+  if (s.failedBlockers.length > 0) {
+    const bData = [['מזהה', 'שאלה', 'דומיין', 'סיכון']];
+    s.failedBlockers.forEach(q => {
+      bData.push([q.id, q.question, q.domain, RISKS[q.id] || '']);
+    });
+    const ws4 = XLSX.utils.aoa_to_sheet(bData);
+    ws4['!cols'] = [{ wch: 12 }, { wch: 50 }, { wch: 28 }, { wch: 70 }];
+    ws4['!rtl'] = true;
+    XLSX.utils.book_append_sheet(wb, ws4, 'חסמות שנכשלו');
+  }
+
+  XLSX.writeFile(wb, `CAIQ_${slug(v.name)}.xlsx`);
+  toast('Excel יוצא');
+}
+
+async function exportPDF() {
+  const v = currentVendor();
+  if (!v) { toast('הוסיפו ספק לפני ייצוא'); return; }
+  const s = computeScores();
+  const t = tierOf(s.finalScore);
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+  const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
+  const M = 48;
+  let y = M;
+
+  doc.setFillColor(10, 25, 41);
+  doc.rect(0, 0, W, 100, 'F');
+  doc.setTextColor(232, 113, 74);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.text('CSA · CCM v4 · CAIQ Vendor Scoring', M, 36);
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(22);
+  doc.text(transliterateOrFallback(v.name), M, 64);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(180, 200, 220);
+  const headerLine = [
+    v.assessor ? `Assessor: ${transliterateOrFallback(v.assessor)}` : null,
+    v.date ? `Date: ${new Date(v.date).toLocaleDateString('en-US')}` : null,
+    v.url ? v.url : null
+  ].filter(Boolean).join('  ·  ');
+  if (headerLine) doc.text(headerLine, M, 84);
+
+  y = 130;
+
+  doc.setDrawColor(226, 225, 218);
+  doc.setLineWidth(1);
+  doc.roundedRect(M, y, W - 2*M, 130, 8, 8, 'S');
+  doc.setTextColor(148, 163, 184);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.text('FINAL SCORE', M + 24, y + 30);
+  let scoreColor = [15, 23, 42];
+  if (t.key === 'low')  scoreColor = [45, 122, 74];
+  if (t.key === 'mid')  scoreColor = [192, 138, 29];
+  if (t.key === 'high') scoreColor = [201, 83, 30];
+  if (t.key === 'crit') scoreColor = [184, 52, 42];
+  doc.setTextColor(...scoreColor);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(56);
+  doc.text(s.finalScore === null ? '—' : s.finalScore.toFixed(1) + '%', M + 24, y + 90);
+
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(148, 163, 184);
+  doc.text('Raw weighted', W - M - 24, y + 30, { align: 'right' });
+  doc.text('Blocker penalty', W - M - 24, y + 52, { align: 'right' });
+  doc.text('Tier', W - M - 24, y + 96, { align: 'right' });
+  doc.setTextColor(15, 23, 42);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(13);
+  doc.text(s.rawScore === null ? '—' : s.rawScore.toFixed(1) + '%', W - M - 24, y + 44, { align: 'right' });
+  doc.setTextColor(s.penalty > 0 ? 184 : 71, s.penalty > 0 ? 52 : 85, s.penalty > 0 ? 42 : 105);
+  doc.text(s.penalty > 0 ? `−${s.penalty} (${s.blockFails}×${BLOCKER_PENALTY})` : '0', W - M - 24, y + 66, { align: 'right' });
+  doc.setTextColor(...scoreColor);
+  const tierLabelEN = { low: 'Low Risk · Approved', mid: 'Medium Risk · Approve w/ Monitoring',
+                        high: 'High Risk · Improvement Required', crit: 'Critical Risk · Not Approved',
+                        none: 'No answers entered' }[t.key];
+  doc.text(tierLabelEN, W - M - 24, y + 110, { align: 'right' });
+
+  doc.setTextColor(148, 163, 184);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.text(`YES ${s.yes}  ·  NO ${s.no}  ·  N/A ${s.na}  ·  Blockers failed: ${s.blockFails}`, M + 24, y + 110);
+
+  y += 160;
+
+  if (v.contact || v.engagementNotes) {
+    doc.setTextColor(15, 23, 42);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.text('Engagement Context', M, y);
+    y += 16;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(71, 85, 105);
+    if (v.contact) {
+      doc.text(`Contact: ${transliterateOrFallback(v.contact)}`, M, y);
+      y += 14;
+    }
+    if (v.engagementNotes) {
+      const lines = doc.splitTextToSize(`Notes: ${transliterateOrFallback(v.engagementNotes)}`, W - 2*M);
+      doc.text(lines, M, y);
+      y += lines.length * 12 + 4;
+    }
+    y += 8;
+  }
+
+  if (y > H - 200) { doc.addPage(); y = M; }
+  doc.setTextColor(15, 23, 42);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(13);
+  doc.text('Domain Breakdown', M, y);
+  y += 20;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  Object.values(s.byDomain).forEach(d => {
+    if (y > H - 60) { doc.addPage(); y = M; }
+    const domTier = tierOf(d.score);
+    let dColor = [148,163,184];
+    if (domTier.key === 'low')  dColor = [45, 122, 74];
+    if (domTier.key === 'mid')  dColor = [192, 138, 29];
+    if (domTier.key === 'high') dColor = [201, 83, 30];
+    if (domTier.key === 'crit') dColor = [184, 52, 42];
+    doc.setTextColor(15, 23, 42);
+    doc.text(`${d.code} · ${d.name}`, M, y);
+    doc.setTextColor(148, 163, 184);
+    doc.text(`weight ${d.weight_normalized}%`, M + 280, y);
+    doc.setFillColor(236, 235, 228);
+    doc.roundedRect(M + 350, y - 8, 120, 8, 2, 2, 'F');
+    if (d.score !== null) {
+      doc.setFillColor(...dColor);
+      doc.roundedRect(M + 350, y - 8, 120 * (d.score/100), 8, 2, 2, 'F');
+    }
+    doc.setTextColor(...dColor);
+    doc.setFont('helvetica', 'bold');
+    doc.text(d.score === null ? '—' : d.score.toFixed(0) + '%', W - M, y, { align: 'right' });
+    doc.setFont('helvetica', 'normal');
+    y += 18;
+  });
+
+  if (s.failedBlockers.length > 0) {
+    if (y > H - 100) { doc.addPage(); y = M; }
+    y += 14;
+    doc.setTextColor(184, 52, 42);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    doc.text(`Failed Blocker Controls (${s.failedBlockers.length})`, M, y);
+    y += 18;
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    s.failedBlockers.forEach(q => {
+      if (y > H - 60) { doc.addPage(); y = M; }
+      doc.setTextColor(184, 52, 42);
+      doc.setFont('helvetica', 'bold');
+      doc.text(q.id, M, y);
+      doc.setTextColor(15, 23, 42);
+      doc.setFont('helvetica', 'normal');
+      const lines = doc.splitTextToSize(transliterateOrFallback(q.question), W - 2*M - 60);
+      doc.text(lines, M + 60, y);
+      y += Math.max(14, lines.length * 12) + 4;
+    });
+  }
+
+  const pages = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pages; i++) {
+    doc.setPage(i);
+    doc.setTextColor(148, 163, 184);
+    doc.setFontSize(8);
+    doc.text(`CAIQ Vendor Scoring · ${transliterateOrFallback(v.name)} · Page ${i}/${pages}`, W/2, H - 20, { align: 'center' });
+  }
+
+  doc.save(`CAIQ_${slug(v.name)}.pdf`);
+  toast('PDF יוצא');
+}
+
+// Helpers
+function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeAttr(s) { return escapeHtml(s); }
+function slug(s) { return String(s).replace(/[^a-zA-Z0-9א-ת]+/g, '_').replace(/^_|_$/g,'') || 'vendor'; }
+function transliterateOrFallback(s) {
+  if (/[֐-׿]/.test(s)) return '[Hebrew text — see Excel/JSON export]';
+  return s;
+}
+function download(blob, name) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+function switchView(viewName) {
+  // Sidebar nav
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.view === viewName));
+  // Mobile bottom nav
+  document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.toggle('active', b.dataset.view === viewName));
+  // Views
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + viewName));
+  renderTopbar();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadState();
+
+  // Sidebar nav
+  document.querySelectorAll('.nav-item').forEach(btn => {
+    btn.addEventListener('click', () => switchView(btn.dataset.view));
+  });
+  // Mobile bottom nav
+  document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => switchView(btn.dataset.view));
+  });
+
+  document.getElementById('vendorSelect').addEventListener('change', e => {
+    state.currentId = e.target.value;
+    saveState();
+    render();
+  });
+
+  document.getElementById('searchBox').addEventListener('input', () => renderQuestionnaire());
+
+  document.getElementById('vendorModal').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') saveVendorModal();
+    else if (e.key === 'Escape' && modalMode !== 'onboard') closeModal();
+  });
+  document.getElementById('vendorModal').addEventListener('click', e => {
+    if (e.target.id === 'vendorModal' && modalMode !== 'onboard') closeModal();
+  });
+
+  // First-launch onboarding (no vendors at all)
+  if (!state.vendors || Object.keys(state.vendors).length === 0) {
+    state.currentId = null;
+    render();
+    openOnboardingModal();
+  } else {
+    if (!state.currentId || !state.vendors[state.currentId]) {
+      state.currentId = Object.keys(state.vendors)[0];
+      saveState();
+    }
+    render();
+  }
+});
+</script>
+</body>
+</html>
